@@ -1,4 +1,4 @@
-package no.nilsjh.ntnu.mobapp1;
+package no.nilsjh.ntnu.mobapp1.configuration;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
