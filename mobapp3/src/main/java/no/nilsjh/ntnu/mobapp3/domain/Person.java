@@ -10,6 +10,7 @@ import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NamedNativeQuery;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -18,6 +19,7 @@ import javax.validation.constraints.NotNull;
  */
 
 @Entity
+@NamedNativeQuery()
 public class Person implements Serializable{
     @Id @GeneratedValue
     Long personId;
