@@ -1,4 +1,4 @@
-package no.nilsjarh.ntnu.mobapp5.payara.resources;
+package no.nilsjarh.ntnu.mobapp4.resources;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

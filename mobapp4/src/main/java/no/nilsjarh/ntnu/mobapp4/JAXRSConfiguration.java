@@ -1,4 +1,4 @@
-package no.nilsjarh.ntnu.mobapp5.payara;
+package no.nilsjarh.ntnu.mobapp4;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
