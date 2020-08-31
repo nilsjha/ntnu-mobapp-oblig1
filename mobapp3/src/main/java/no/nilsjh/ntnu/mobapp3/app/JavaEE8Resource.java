@@ -46,7 +46,7 @@ public class JavaEE8Resource {
     @POST
     @Path("register")
     public Response createPerson(
-            @FormParam("pid") String email,
+            @FormParam("email") String email,
             @FormParam("pass") String pass) {
         Person p = em.find(Person.class, email);
         Person p = em.
