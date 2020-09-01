@@ -5,12 +5,18 @@
  */
 package no.nilsjarh.ntnu.mobapp4.domain;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
 /**
  *
  * @author nils
  */
 public class Person {
-    private int id;
+    @Id
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    private Long id;
     private String email;
     private String password;
     private String address;
