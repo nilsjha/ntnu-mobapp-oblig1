@@ -5,27 +5,57 @@
  */
 package no.nilsjarh.ntnu.mobapp4.domain;
 
+import java.io.Serializable;
+import java.util.List;
+import javax.json.bind.annotation.JsonbTransient;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 
 /**
  *
  * @author nils
  */
-public class Person {
+@Entity(name = "persons")
+public class Person implements Serializable {
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    @GeneratedValue (strategy = GenerationType.AUTO)
     private Long id;
+    
+    @Email
+    @Column(name = "email")
     private String email;
+    
+    @JsonbTransient
+    @Column(name = "password")
     private String password;
-    private String address;
+    
+    @Column(name = "mobile_phone")
     private String mobilePhone;
+    
+    @Column(name = "first_name")
     private String firstName;
+    
+    @Column(name = "last_name")
     private String lastName;
+    
+    /** REFERENCING SIDE **/
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "id")
+    private List<Purchase> donePurchases;
+    
+    /** REFERENCING SIDE **/
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "id")
+    private List<Item> ownedItems;
 
 
-    public int getId() {
+    public Long getId() {
 	    return this.id;
     }
 
@@ -36,9 +66,7 @@ public class Person {
     public String getPassword() {
 	    return this.password;
     }
-    public String getAddress() {
-	    return this.address;
-    }
+
     public String getMobile() {
 	    return this.mobilePhone;
     }
@@ -49,7 +77,7 @@ public class Person {
 	    return this.lastName;
     }
     
-    public void setId(int id) {
+    public void setId(Long id) {
 	    this.id = id;
     }
     
