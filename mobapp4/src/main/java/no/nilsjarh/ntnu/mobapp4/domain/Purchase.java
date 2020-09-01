@@ -7,6 +7,7 @@ package no.nilsjarh.ntnu.mobapp4.domain;
 
 import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -30,12 +31,14 @@ public class Purchase implements Serializable {
 	@NotNull
 	private Date purchaseTime;
 	
+	/** OWNING SIDE **/
+	@NotNull
+	@ManyToOne(fetch = FetchType.LAZY,  cascade = CascadeType.DETACH)
+	@JoinColumn(name = "buyer_person_id", referencedColumnName = "id")
+	private Person buyerPerson;
+	
+	
 	/** REFERNENCING SIDE **/
 	@OneToOne(mappedBy = "purchases")
 	private Item item;
-	
-	/** OWNING SIDE **/
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "person_id")
-	private Person buyerPerson;
 }

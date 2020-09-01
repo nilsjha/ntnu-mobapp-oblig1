@@ -8,6 +8,7 @@ package no.nilsjarh.ntnu.mobapp4.domain;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -20,6 +21,7 @@ import javax.persistence.OneToOne;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import jdk.internal.jline.internal.Nullable;
 
 /**
  *
@@ -51,16 +53,21 @@ public class Item implements Serializable {
 	@Column(name = "description")
 	private String description;
 
-	/** REFERENCING SIDE **/
-	@OneToOne(mappedBy = "item")
+	/** OWNER SIDE **/
+	@NotNull
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+	@JoinColumn(name = "seller_person_id", referencedColumnName = "id")
+	private Person sellerPerson;
+	
+	
+	/** OWNER SIDE **/
+	@Nullable
+	@OneToOne(cascade = CascadeType.REMOVE)
 	@JoinColumn(name = "purchase_id", referencedColumnName = "id")
 	private Purchase purchase;
 	
-	/** OWNER SIDE **/
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "person_id")
-	private Person sellerPerson;
 	
+
 	
 	
 	

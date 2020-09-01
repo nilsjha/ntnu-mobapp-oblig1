@@ -47,11 +47,11 @@ public class Person implements Serializable {
     private String lastName;
     
     /** REFERENCING SIDE **/
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "id")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "purchases")
     private List<Purchase> donePurchases;
     
     /** REFERENCING SIDE **/
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "id")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "items")
     private List<Item> ownedItems;
 
 
