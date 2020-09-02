@@ -7,6 +7,8 @@ package no.nilsjarh.ntnu.mobapp4.domain;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -35,71 +37,91 @@ public class Item implements Serializable {
 	private Long id;
 	
 	@NotNull
+	@Column(name = "title")
+	private String title;
+		
+	@NotNull
+	@Column(name = "description")
+	private String description;
+	
+	@NotNull
 	@Column(name = "created_time", nullable = false)
-	private Date createdTime;
+	private Timestamp createdTime;
 	
 	@Column(name = "publish_time")
-	private Date publishTime;
+	private Timestamp publishTime;
 	
 	@Future
 	@Column(name = "expire_time")
-	private Date expireTime;
+	private Timestamp expireTime;
 	
 	@Positive
 	@Column(name = "price_nok")
 	private BigDecimal priceNok;
-	
-	@NotNull
-	@Column(name = "description")
-	private String description;
+
 
 	/** OWNER SIDE **/
-	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
-	@JoinColumn(name = "seller_person_id", referencedColumnName = "id")
+	@JoinColumn(name = "seller_person_id", referencedColumnName = "id", 
+		nullable = false)
+	@NotNull
 	private Person sellerPerson;
 	
 	
 	/** OWNER SIDE **/
-	@Nullable
 	@OneToOne(cascade = CascadeType.REMOVE)
 	@JoinColumn(name = "purchase_id", referencedColumnName = "id")
 	private Purchase purchase;
 	
+	public Item() {
+		this.createdTime = Timestamp.from(Instant.MIN);
+		
+	}
 	
+	public Item(String title, String descr, Person seller) {
+		this.createdTime = Timestamp.from(Instant.MIN);
+		this.title = title;
+		this.description = descr;
+		this.sellerPerson = seller;
+	}
 
-	
-	
-	
 	public Long getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Date getCreatedTime() {
+	public Timestamp getCreatedTime() {
 		return createdTime;
 	}
 
-	public void setCreatedTime(Date createdTime) {
-		this.createdTime = createdTime;
+	public String getTitle() {
+		return title;
 	}
 
-	public Date getPublishTime() {
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public Timestamp getPublishTime() {
 		return publishTime;
 	}
 
-	public void setPublishTime(Date publishTime) {
+	public void setPublishTime(Timestamp publishTime) {
 		this.publishTime = publishTime;
 	}
 
-	public Date getExpireTime() {
+	public Timestamp getExpireTime() {
 		return expireTime;
 	}
 
-	public void setExpireTime(Date expireTime) {
+	public void setExpireTime(Timestamp expireTime) {
 		this.expireTime = expireTime;
 	}
 
@@ -110,8 +132,22 @@ public class Item implements Serializable {
 	public void setPriceNok(BigDecimal priceNok) {
 		this.priceNok = priceNok;
 	}
-	
-	
+
+	public Person getSellerPerson() {
+		return sellerPerson;
+	}
+
+	public void setSellerPerson(Person sellerPerson) {
+		this.sellerPerson = sellerPerson;
+	}
+
+	public Purchase getPurchase() {
+		return purchase;
+	}
+
+	public void setPurchase(Purchase purchase) {
+		this.purchase = purchase;
+	}
 	
 	
 }

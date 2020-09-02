@@ -6,8 +6,11 @@
 package no.nilsjarh.ntnu.mobapp4.domain;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.Instant;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -25,20 +28,59 @@ import javax.validation.constraints.NotNull;
 @Entity(name = "purchases")
 public class Purchase implements Serializable {
 	@Id
+	@Column(name = "id")
 	@GeneratedValue (strategy = GenerationType.AUTO)
 	private Long id;
 	
 	@NotNull
-	private Date purchaseTime;
+	@Column(name = "purchase_time")
+	private Timestamp purchaseTime;
 	
 	/** OWNING SIDE **/
-	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY,  cascade = CascadeType.DETACH)
-	@JoinColumn(name = "buyer_person_id", referencedColumnName = "id")
+	@JoinColumn(name = "buyer_person_id", referencedColumnName = "id",
+		nullable = false)
+	@NotNull
 	private Person buyerPerson;
 	
 	
 	/** REFERNENCING SIDE **/
-	@OneToOne(mappedBy = "purchases")
+	@OneToOne(mappedBy = "purchase")
 	private Item item;
+	
+	public Purchase() {
+		this.purchaseTime = Timestamp.from(Instant.MIN);
+	}
+	
+	public Purchase(Person buyerPerson) {
+		this.purchaseTime = Timestamp.from(Instant.MIN);
+		this.buyerPerson = buyerPerson;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public Timestamp getPurchaseTime() {
+		return purchaseTime;
+	}
+	
+
+	public Person getBuyerPerson() {
+		return buyerPerson;
+	}
+
+	public void setBuyerPerson(Person buyerPerson) {
+		this.buyerPerson = buyerPerson;
+	}
+
+	public Item getItem() {
+		return item;
+	}
+
+	public void setItem(Item item) {
+		this.item = item;
+	}
+	
+	
 }

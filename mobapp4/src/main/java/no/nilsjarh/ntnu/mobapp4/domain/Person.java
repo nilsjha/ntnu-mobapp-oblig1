@@ -14,6 +14,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
@@ -30,6 +32,7 @@ public class Person implements Serializable {
     private Long id;
     
     @Email
+    @NotNull
     @Column(name = "email")
     private String email;
     
@@ -37,68 +40,78 @@ public class Person implements Serializable {
     @Column(name = "password")
     private String password;
     
-    @Column(name = "mobile_phone")
-    private String mobilePhone;
-    
     @Column(name = "first_name")
     private String firstName;
     
     @Column(name = "last_name")
     private String lastName;
     
+    @Column(name = "mobile_phone")
+    private String mobilePhone;
+    
     /** REFERENCING SIDE **/
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "purchases")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "buyerPerson")
     private List<Purchase> donePurchases;
     
     /** REFERENCING SIDE **/
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "items")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "sellerPerson")
     private List<Item> ownedItems;
 
-
-    public Long getId() {
-	    return this.id;
+    public Person() {
+	    
     }
 
-    public String getEmail() {
-	    return this.email;
-    }
-
-    public String getPassword() {
-	    return this.password;
-    }
-
-    public String getMobile() {
-	    return this.mobilePhone;
-    }
-    public String getFirstName() {
-	    return this.firstName;
-    }
-    public String getLastName() {
-	    return this.lastName;
-    }
-    
-    public void setId(Long id) {
-	    this.id = id;
-    }
-    
-    public void setEmail(String email) {
+    public Person(String email, String firstName, String lastName, String phone) {
 	    this.email = email;
+	    this.firstName = firstName;
+	    this.lastName = lastName;
+	    this.mobilePhone = phone;
     }
+
+	public Long getId() {
+		return id;
+	}
     
-    public void setPassword(String password) {
-	    this.password = password;
-    }
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getMobilePhone() {
+		return mobilePhone;
+	}
+
+	public void setMobilePhone(String mobilePhone) {
+		this.mobilePhone = mobilePhone;
+	}
     
-    public void setMobile(String number) {
-	    this.mobilePhone = number;
-    }
     
-    public void setFirstName(String name) {
-	    this.firstName = name;
-    }
-    
-   public void setLastName(String name) {
-	  this.lastName = name;
-   }
-   
 }
