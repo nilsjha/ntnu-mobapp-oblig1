@@ -25,53 +25,61 @@ import javax.validation.constraints.NotNull;
  * @author nils
  */
 @Entity(name = "persons")
+@NamedQueries({
+	@NamedQuery(name = Person.FIND_ALL_PERSONS, query = "SELECT p FROM persons p")})
 public class Person implements Serializable {
-    @Id
-    @Column(name = "id")
-    @GeneratedValue (strategy = GenerationType.AUTO)
-    private Long id;
-    
-    @Email
-    @NotNull
-    @Column(name = "email")
-    private String email;
-    
-    @JsonbTransient
-    @Column(name = "password")
-    private String password;
-    
-    @Column(name = "first_name")
-    private String firstName;
-    
-    @Column(name = "last_name")
-    private String lastName;
-    
-    @Column(name = "mobile_phone")
-    private String mobilePhone;
-    
-    /** REFERENCING SIDE **/
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "buyerPerson")
-    private List<Purchase> donePurchases;
-    
-    /** REFERENCING SIDE **/
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "sellerPerson")
-    private List<Item> ownedItems;
 
-    public Person() {
-	    
-    }
+	public final static String FIND_ALL_PERSONS = "findAllPersons";
 
-    public Person(String email, String firstName, String lastName, String phone) {
-	    this.email = email;
-	    this.firstName = firstName;
-	    this.lastName = lastName;
-	    this.mobilePhone = phone;
-    }
+	@Id
+	@Column(name = "id")
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
+
+	@Email
+	@NotNull
+	@Column(name = "email")
+	private String email;
+
+	@JsonbTransient
+	@Column(name = "password")
+	private String password;
+
+	@Column(name = "first_name")
+	private String firstName;
+
+	@Column(name = "last_name")
+	private String lastName;
+
+	@Column(name = "mobile_phone")
+	private String mobilePhone;
+
+	/**
+	 * REFERENCING SIDE *
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "buyerPerson")
+	private List<Purchase> donePurchases;
+
+	/**
+	 * REFERENCING SIDE *
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "sellerPerson")
+	private List<Item> ownedItems;
+
+	public Person() {
+
+	}
+
+	public Person(String email, String firstName, String lastName, String phone) {
+		this.email = email;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.mobilePhone = phone;
+	}
 
 	public Long getId() {
 		return id;
 	}
-    
 
 	public String getEmail() {
 		return email;
@@ -112,6 +120,5 @@ public class Person implements Serializable {
 	public void setMobilePhone(String mobilePhone) {
 		this.mobilePhone = mobilePhone;
 	}
-    
-    
+
 }

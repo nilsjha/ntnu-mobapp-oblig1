@@ -23,28 +23,29 @@ import org.junit.Test;
  * @author nils
  */
 public class PersonTest {
+
 	private static EntityManagerFactory fab;
 	private EntityManager em;
-	
+
 	@BeforeClass
 	public static void createEMfactory() {
 		fab = Persistence
 			.createEntityManagerFactory("Test");
-		
+
 	}
-	
+
 	@AfterClass
 	public static void closeEMfactory() {
 		fab.close();
 	}
-	
+
 	@Before
 	public void beginTransaction() {
 		em = fab.createEntityManager();
 		em.getTransaction().begin();
 	}
-	
-	@After 
+
+	@After
 	public void rollbackTransaction() {
 		if (em.getTransaction().isActive()) {
 			em.getTransaction().rollback();
@@ -53,18 +54,26 @@ public class PersonTest {
 			em.close();
 		}
 	}
-	
+
 	@Test
 	public void testValidCreatePerson() {
-		try {
-			Person donald = new Person();
-			donald.setEmail("thedonald@whitehouse.gov");
-			donald.setFirstName("Donald");
-			donald.setLastName("Trumpo");
-			em.persist(donald);
-			
-			assertEquals(1, 1);
-		} catch (Exception e) {
-		}
+		Person donald = new Person();
+		donald.setEmail("thedonald@whitehouse.gov");
+		donald.setFirstName("Donald");
+		donald.setLastName("Trumpo");
+
+		em.persist(donald);
+
+		Query query = em.createNamedQuery(Person.FIND_ALL_PERSONS);
+		Person ret = (Person) query.getResultList().get(0);
+		System.out.println("Returned tuple id "
+			+ ret.getId()
+			+ "\nName:"
+			+ ret.getFirstName() + " "
+			+ ret.getLastName() + "\n"
+			+ ret.getEmail() + "\n"
+			+ ret.getMobilePhone() + "\n"
+		);
+		assertEquals(1, query.getResultList().size());
 	}
 }
