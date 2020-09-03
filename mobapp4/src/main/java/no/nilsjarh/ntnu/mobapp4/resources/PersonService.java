@@ -31,7 +31,7 @@ public class PersonService {
 	@GET
 	@Path("get/{id}")
 	public Response getUser(@PathParam("id") int id) {
-		Person p = em.find(Person.class, id);
+		User p = em.find(User.class, id);
 		if(p == null) {
 			
 		}

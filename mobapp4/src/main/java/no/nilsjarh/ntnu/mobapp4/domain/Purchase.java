@@ -41,7 +41,7 @@ public class Purchase implements Serializable {
 	@JoinColumn(name = "buyer_person_id", referencedColumnName = "id",
 		nullable = false)
 	@NotNull
-	private Person buyerPerson;
+	private User buyerPerson;
 	
 	
 	/** REFERNENCING SIDE **/
@@ -52,7 +52,7 @@ public class Purchase implements Serializable {
 		this.purchaseTime = Timestamp.from(Instant.MIN);
 	}
 	
-	public Purchase(Person buyerPerson) {
+	public Purchase(User buyerPerson) {
 		this.purchaseTime = Timestamp.from(Instant.MIN);
 		this.buyerPerson = buyerPerson;
 	}
@@ -66,11 +66,11 @@ public class Purchase implements Serializable {
 	}
 	
 
-	public Person getBuyerPerson() {
+	public User getBuyerPerson() {
 		return buyerPerson;
 	}
 
-	public void setBuyerPerson(Person buyerPerson) {
+	public void setBuyerPerson(User buyerPerson) {
 		this.buyerPerson = buyerPerson;
 	}
 

@@ -13,31 +13,45 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import no.nilsjarh.ntnu.mobapp4.domain.User;
 
 /**
  *
  * @author mikael
  */
-@Entity @Table(name = "AGROUP")
-@Data @AllArgsConstructor @NoArgsConstructor @EqualsAndHashCode(exclude="users")
+@Entity
+@Table(name = "groups")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(exclude = "users")
 public class Group implements Serializable {
-    public static final String USER = "user";
-    public static final String ADMIN = "admin";
-    public static final String[] GROUPS = {USER, ADMIN};
 
-    @Id
-    String name;
+	public static final String USER = "user";
+	public static final String ADMIN = "admin";
+	public static final String[] GROUPS = {USER, ADMIN};
 
-    String project;
+	@Id
+	String name;
 
-    @JsonbTransient
-    @ManyToMany
-    @JoinTable(name="AUSERGROUP",
-            joinColumns = @JoinColumn(name="name", referencedColumnName = "name"),
-            inverseJoinColumns = @JoinColumn(name="userid",referencedColumnName = "userid"))
-    List<User> users;
+	String project;
 
-    public Group(String name) {
-        this.name = name;
-    }
+	/**
+	 * CROSS-JOIN - REFERENCE *
+	 */
+	
+	@JsonbTransient
+	@ManyToMany
+	@JoinTable(name = "user_has_group",
+		joinColumns = @JoinColumn(
+			name = "name",
+			referencedColumnName = "group_name"),
+		inverseJoinColumns = @JoinColumn(
+			name = "person_id",
+			referencedColumnName = "id"))
+	List<User> users;
+
+	public Group(String name) {
+		this.name = name;
+	}
 }

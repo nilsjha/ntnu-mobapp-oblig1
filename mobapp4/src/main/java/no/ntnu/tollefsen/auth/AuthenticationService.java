@@ -35,9 +35,12 @@ import lombok.extern.java.Log;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.InvalidKeyException;
+import java.util.List;
 import javax.annotation.Resource;
+import javax.persistence.Query;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
+import no.nilsjarh.ntnu.mobapp4.domain.User;
 import no.nilsjarh.ntnu.mobapp4.resources.DatasourceProducer;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -67,8 +70,8 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 @Log
 public class AuthenticationService {
 
-    private static final String INSERT_USERGROUP = "INSERT INTO AUSERGROUP(NAME,USERID) VALUES (?,?)";
-    private static final String DELETE_USERGROUP = "DELETE FROM AUSERGROUP WHERE NAME = ? AND USERID = ?";
+    private static final String INSERT_USERGROUP = "INSERT INTO user_has_group(group_name,id) VALUES (?,?)";
+    private static final String DELETE_USERGROUP = "DELETE FROM user_has_group WHERE group_name LIKE ? AND id LIKE ?";
 
     @Inject
     KeyService keyService;
@@ -102,7 +105,7 @@ public class AuthenticationService {
 
     /**
      *
-     * @param uid
+     * @param email
      * @param pwd
      * @param request
      * @return
@@ -110,11 +113,11 @@ public class AuthenticationService {
     @GET
     @Path("login")
     public Response login(
-            @QueryParam("uid") @NotBlank String uid,
+            @QueryParam("email") @NotBlank String email,
             @QueryParam("pwd") @NotBlank String pwd,
             @Context HttpServletRequest request) {
         CredentialValidationResult result = identityStoreHandler.validate(
-                new UsernamePasswordCredential(uid, pwd));
+                new UsernamePasswordCredential(email, pwd));
 
         if (result.getStatus() == CredentialValidationResult.Status.VALID) {
             String token = issueToken(result.getCallerPrincipal().getName(),
@@ -162,46 +165,55 @@ public class AuthenticationService {
 
     /**
      * Does an insert into the AUSER and AUSERGROUP tables. It creates a SHA-256
-     * hash of the password and Base64 encodes it before the user is created in
+     * hash of the password and Base64 encodes it before the u is created in
      * the database. The authentication system will read the AUSER table when
      * doing an authentication.
      *
-     * @param uid
+     * @param email
      * @param pwd
      * @return
      */
     @POST
     @Path("create")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createUser(@FormParam("uid") String uid, @FormParam("pwd") String pwd) {
-        User user = em.find(User.class, uid);
-        if (user != null) {
-            log.log(Level.INFO, "user already exists {0}", uid);
+    public Response createUser(@FormParam("email") String email, @FormParam("pwd") String pwd) {	
+	Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
+	List<User> foundUsers = query.getResultList();
+	
+        if (foundUsers.isEmpty() == false) {
+            log.log(Level.INFO, "User already exists {0}",
+		    email);
             return Response.status(Response.Status.BAD_REQUEST).build();
         } else {
-            user = new User();
-            user.setUserid(uid);
-            user.setPassword(hasher.generate(pwd.toCharArray()));
+            User u = new User();
+            u.setEmail(email);
+            u.setPassword(hasher.generate(pwd.toCharArray()));
             Group usergroup = em.find(Group.class, Group.USER);
-            user.getGroups().add(usergroup);
-            return Response.ok(em.merge(user)).build();
+            u.getGroups().add(usergroup);
+            return Response.ok(em.merge(u)).build();
         }
     }
 
-    public User createUser(String uid, String pwd, String firstName, String lastName) {
-        User user = em.find(User.class, uid);
-        if (user != null) {
-            log.log(Level.INFO, "user already exists {0}", uid);
-            throw new IllegalArgumentException("User " + uid + " already exists");
+    public User createUser(String email, String pwd, String firstName, String lastName) {
+        Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
+	List<User> foundUsers = query.getResultList();
+	
+        if (foundUsers.isEmpty() == false) {
+		User ex = foundUsers.get(0);
+		
+		log.log(Level.INFO, "User {0} already exists",ex.getId());
+		log.log(Level.INFO, "email: ",ex.getEmail());
+		throw new IllegalArgumentException(
+			"User " + email + " already exists");
         } else {
-            user = new User();
-            user.setUserid(uid);
-            user.setPassword(hasher.generate(pwd.toCharArray()));
-            user.setFirstName(firstName);
-            user.setLastName(lastName);
+            User u = new User();
+            u.setEmail(email);
+            u.setPassword(hasher.generate(pwd.toCharArray()));
+            u.setFirstName(firstName);
+            u.setLastName(lastName);
             Group usergroup = em.find(Group.class, Group.USER);
-            user.getGroups().add(usergroup);
-            return em.merge(user);
+            u.getGroups().add(usergroup);
+            return em.merge(u);
         }        
     }
 
@@ -220,14 +232,14 @@ public class AuthenticationService {
 
     /**
      *
-     * @param uid
+     * @param email
      * @param role
      * @return
      */
     @PUT
     @Path("addrole")
     @RolesAllowed(value = {Group.ADMIN})
-    public Response addRole(@QueryParam("uid") String uid, @QueryParam("role") String role) {
+    public Response addRole(@QueryParam("email") String email, @QueryParam("role") String role) {
         if (!roleExists(role)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
@@ -235,7 +247,7 @@ public class AuthenticationService {
         try (Connection c = dataSource.getConnection();
              PreparedStatement psg = c.prepareStatement(INSERT_USERGROUP)) {
             psg.setString(1, role);
-            psg.setString(2, uid);
+            psg.setString(2, email);
             psg.executeUpdate();
         } catch (SQLException ex) {
             log.log(Level.SEVERE, null, ex);
@@ -267,14 +279,14 @@ public class AuthenticationService {
 
     /**
      *
-     * @param uid
+     * @param email
      * @param role
      * @return
      */
     @PUT
     @Path("removerole")
     @RolesAllowed(value = {Group.ADMIN})
-    public Response removeRole(@QueryParam("uid") String uid, @QueryParam("role") String role) {
+    public Response removeRole(@QueryParam("email") String email, @QueryParam("role") String role) {
         if (!roleExists(role)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
@@ -282,7 +294,7 @@ public class AuthenticationService {
         try (Connection c = dataSource.getConnection();
                 PreparedStatement psg = c.prepareStatement(DELETE_USERGROUP)) {
             psg.setString(1, role);
-            psg.setString(2, uid);
+            psg.setString(2, email);
             psg.executeUpdate();
         } catch (SQLException ex) {
             log.log(Level.SEVERE, null, ex);
@@ -294,7 +306,7 @@ public class AuthenticationService {
 
     /**
      *
-     * @param uid
+     * @param email
      * @param password
      * @param sc
      * @return
@@ -302,24 +314,24 @@ public class AuthenticationService {
     @PUT
     @Path("changepassword")
     @RolesAllowed(value = {Group.USER})
-    public Response changePassword(@QueryParam("uid") String uid,
+    public Response changePassword(@QueryParam("email") String email,
             @QueryParam("pwd") String password,
             @Context SecurityContext sc) {
         String authuser = sc.getUserPrincipal() != null ? sc.getUserPrincipal().getName() : null;
-        if (authuser == null || uid == null || (password == null || password.length() < 3)) {
-            log.log(Level.SEVERE, "Failed to change password on user {0}", uid);
+        if (authuser == null || email == null || (password == null || password.length() < 3)) {
+            log.log(Level.SEVERE, "Failed to change password on u {0}", email);
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        if (authuser.compareToIgnoreCase(uid) != 0 && !sc.isUserInRole(Group.ADMIN)) {
+        if (authuser.compareToIgnoreCase(email) != 0 && !sc.isUserInRole(Group.ADMIN)) {
             log.log(Level.SEVERE,
-                    "No admin access for {0}. Failed to change password on user {1}",
-                    new Object[]{authuser, uid});
+                    "No admin access for {0}. Failed to change password on u {1}",
+                    new Object[]{authuser, email});
             return Response.status(Response.Status.BAD_REQUEST).build();
         } else {
-            User user = em.find(User.class, uid);
-            user.setPassword(hasher.generate(password.toCharArray()));
-            em.merge(user);
+            User u = em.find(User.class, email);
+            u.setPassword(hasher.generate(password.toCharArray()));
+            em.merge(u);
             return Response.ok().build();
         }
     }

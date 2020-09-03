@@ -4,7 +4,7 @@
     <jta-data-source>java:app/jdbc/postgres-microprofile</jta-data-source>
     <class>no.nilsjarh.ntnu.mobapp4.domain.Item</class>
     <class>no.nilsjarh.ntnu.mobapp4.domain.Purchase</class>
-    <class>no.nilsjarh.ntnu.mobapp4.domain.Person</class>
+    <class>no.nilsjarh.ntnu.mobapp4.domain.User</class>
     <properties>
       <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
       <property name="eclipselink.ddl-generation.output-mode" value="both"/>

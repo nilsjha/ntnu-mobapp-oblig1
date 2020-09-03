@@ -74,7 +74,7 @@ public class Item implements Serializable {
 	@JoinColumn(name = "seller_person_id", referencedColumnName = "id", 
 		nullable = false)
 	@NotNull
-	private Person sellerPerson;
+	private User sellerPerson;
 	
 	
 	/** OWNER SIDE **/
@@ -87,7 +87,7 @@ public class Item implements Serializable {
 		
 	}
 	
-	public Item(String title, String descr, Person seller) {
+	public Item(String title, String descr, User seller) {
 		this.createdTime = new Date();
 		this.title = title;
 		this.description = descr;
@@ -142,11 +142,11 @@ public class Item implements Serializable {
 		this.priceNok = priceNok;
 	}
 
-	public Person getSellerPerson() {
+	public User getSellerPerson() {
 		return sellerPerson;
 	}
 
-	public void setSellerPerson(Person sellerPerson) {
+	public void setSellerPerson(User sellerPerson) {
 		this.sellerPerson = sellerPerson;
 	}
 

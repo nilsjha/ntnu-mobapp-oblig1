@@ -28,8 +28,8 @@ import javax.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import static no.ntnu.tollefsen.auth.User.FIND_ALL_USERS;
-import static no.ntnu.tollefsen.auth.User.FIND_USER_BY_IDS;
+import static no.ntnu.tollefsen.auth.UserDeprecated.FIND_ALL_USERS;
+import static no.ntnu.tollefsen.auth.UserDeprecated.FIND_USER_BY_IDS;
 
 
 /**
@@ -41,7 +41,7 @@ import static no.ntnu.tollefsen.auth.User.FIND_USER_BY_IDS;
 @Data @AllArgsConstructor @NoArgsConstructor
 @NamedQuery(name = FIND_ALL_USERS, query = "select u from User u order by u.firstName")
 @NamedQuery(name = FIND_USER_BY_IDS, query = "select u from User u where u.userid in :ids")
-public class User implements Serializable {
+public class UserDeprecated implements Serializable {
     public static final String FIND_USER_BY_IDS = "User.findUserByIds";
     public static final String FIND_ALL_USERS = "User.findAllUsers";
     
