@@ -10,6 +10,7 @@ import javax.persistence.PersistenceContext;
  *
  * @author mikael
  */
+
 @Singleton
 @Startup
 public class AuthRunOnStartup {
