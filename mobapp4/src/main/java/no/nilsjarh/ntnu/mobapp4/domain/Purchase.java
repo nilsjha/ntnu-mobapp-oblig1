@@ -38,10 +38,10 @@ public class Purchase implements Serializable {
 	
 	/** OWNING SIDE **/
 	@ManyToOne(fetch = FetchType.LAZY,  cascade = CascadeType.DETACH)
-	@JoinColumn(name = "buyer_person_id", referencedColumnName = "id",
+	@JoinColumn(name = "buyer_user_id", referencedColumnName = "id",
 		nullable = false)
 	@NotNull
-	private User buyerPerson;
+	private User buyerUser;
 	
 	
 	/** REFERNENCING SIDE **/
@@ -52,9 +52,9 @@ public class Purchase implements Serializable {
 		this.purchaseTime = Timestamp.from(Instant.MIN);
 	}
 	
-	public Purchase(User buyerPerson) {
+	public Purchase(User buyerUser) {
 		this.purchaseTime = Timestamp.from(Instant.MIN);
-		this.buyerPerson = buyerPerson;
+		this.buyerUser = buyerUser;
 	}
 
 	public Long getId() {
@@ -66,12 +66,12 @@ public class Purchase implements Serializable {
 	}
 	
 
-	public User getBuyerPerson() {
-		return buyerPerson;
+	public User getBuyerUser() {
+		return buyerUser;
 	}
 
-	public void setBuyerPerson(User buyerPerson) {
-		this.buyerPerson = buyerPerson;
+	public void setBuyerUser(User buyerUser) {
+		this.buyerUser = buyerUser;
 	}
 
 	public Item getItem() {

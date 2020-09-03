@@ -34,7 +34,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import no.ntnu.tollefsen.auth.Group;
-import no.ntnu.tollefsen.auth.UserDeprecated;
 
 /**
  *
@@ -102,9 +101,9 @@ public class User implements Serializable {
 	@JoinTable(name = "user_has_group",
 		joinColumns = @JoinColumn(
 			name = "id",
-			referencedColumnName = "user_id"),
+			referencedColumnName = "id"),
 		inverseJoinColumns = @JoinColumn(
-			name = "group_name",
+			name = "name",
 			referencedColumnName = "name"))
 	List<Group> groups;
 

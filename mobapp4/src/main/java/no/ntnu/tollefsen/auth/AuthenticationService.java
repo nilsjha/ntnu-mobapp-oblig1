@@ -70,8 +70,8 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 @Log
 public class AuthenticationService {
 
-    private static final String INSERT_USERGROUP = "INSERT INTO user_has_group(group_name,id) VALUES (?,?)";
-    private static final String DELETE_USERGROUP = "DELETE FROM user_has_group WHERE group_name LIKE ? AND id LIKE ?";
+    private static final String INSERT_USERGROUP = "INSERT INTO user_has_group(name,id) VALUES (?,?)";
+    private static final String DELETE_USERGROUP = "DELETE FROM user_has_group WHERE name LIKE ? AND id LIKE ?";
 
     @Inject
     KeyService keyService;

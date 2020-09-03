@@ -76,7 +76,7 @@ public class ItemTest {
 		item = new Item();
 		item.setTitle("Russian emails");
 		item.setDescription("Some secretz...");
-		item.setSellerPerson(seller);
+		item.setSellerUser(seller);
 		
 		em.persist(item);
 		

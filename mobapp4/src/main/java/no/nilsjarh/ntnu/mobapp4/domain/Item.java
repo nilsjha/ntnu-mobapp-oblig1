@@ -71,10 +71,10 @@ public class Item implements Serializable {
 
 	/** OWNER SIDE **/
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
-	@JoinColumn(name = "seller_person_id", referencedColumnName = "id", 
+	@JoinColumn(name = "seller_user_id", referencedColumnName = "id", 
 		nullable = false)
 	@NotNull
-	private User sellerPerson;
+	private User sellerUser;
 	
 	
 	/** OWNER SIDE **/
@@ -91,7 +91,7 @@ public class Item implements Serializable {
 		this.createdTime = new Date();
 		this.title = title;
 		this.description = descr;
-		this.sellerPerson = seller;
+		this.sellerUser = seller;
 	}
 
 	public Long getId() {
@@ -142,12 +142,12 @@ public class Item implements Serializable {
 		this.priceNok = priceNok;
 	}
 
-	public User getSellerPerson() {
-		return sellerPerson;
+	public User getSellerUser() {
+		return sellerUser;
 	}
 
-	public void setSellerPerson(User sellerPerson) {
-		this.sellerPerson = sellerPerson;
+	public void setSellerUser(User sellerUser) {
+		this.sellerUser = sellerUser;
 	}
 
 	public Purchase getPurchase() {

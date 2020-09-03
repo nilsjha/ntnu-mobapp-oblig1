@@ -45,9 +45,9 @@ public class Group implements Serializable {
 	@JoinTable(name = "user_has_group",
 		joinColumns = @JoinColumn(
 			name = "name",
-			referencedColumnName = "group_name"),
+			referencedColumnName = "name"),
 		inverseJoinColumns = @JoinColumn(
-			name = "user_id",
+			name = "id",
 			referencedColumnName = "id"))
 	List<User> users;
 
