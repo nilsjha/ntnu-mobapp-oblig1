@@ -47,7 +47,7 @@ public class Group implements Serializable {
 			name = "name",
 			referencedColumnName = "group_name"),
 		inverseJoinColumns = @JoinColumn(
-			name = "person_id",
+			name = "user_id",
 			referencedColumnName = "id"))
 	List<User> users;
 

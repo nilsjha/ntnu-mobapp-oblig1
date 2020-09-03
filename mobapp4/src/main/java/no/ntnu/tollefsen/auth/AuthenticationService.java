@@ -164,7 +164,7 @@ public class AuthenticationService {
     }
 
     /**
-     * Does an insert into the AUSER and AUSERGROUP tables. It creates a SHA-256
+     * Does an insert into the users and user_has_group tables. It creates a SHA-256
      * hash of the password and Base64 encodes it before the u is created in
      * the database. The authentication system will read the AUSER table when
      * doing an authentication.
@@ -245,9 +245,9 @@ public class AuthenticationService {
         }
 
         try (Connection c = dataSource.getConnection();
-             PreparedStatement psg = c.prepareStatement(INSERT_USERGROUP)) {
+            PreparedStatement psg = c.prepareStatement(INSERT_USERGROUP)) {
             psg.setString(1, role);
-            psg.setString(2, email);
+            psg.setLong(2, getCurrentUser().getId());
             psg.executeUpdate();
         } catch (SQLException ex) {
             log.log(Level.SEVERE, null, ex);
