@@ -1,18 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="2.2" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
-  <!-- Define Persistence Unit -->
-  <persistence-unit name="Test">
-    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+  <persistence-unit name="mpconfig" transaction-type="JTA">
+    <jta-data-source>java:app/jdbc/postgres-microprofile</jta-data-source>
+    <class>no.nilsjarh.ntnu.mobapp4.domain.Item</class>
     <class>no.nilsjarh.ntnu.mobapp4.domain.Purchase</class>
     <class>no.nilsjarh.ntnu.mobapp4.domain.Person</class>
-    <class>no.nilsjarh.ntnu.mobapp4.domain.Item</class>
-    <class>no.nilsjarh.ntnu.mobapp4.test.db.PersonTest</class>
     <properties>
-      <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://***REMOVED***:5432/mobapp6"/>
-      <property name="javax.persistence.jdbc.user" value="mobapp5"/>
-      <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
-      <property name="javax.persistence.jdbc.password" value="***REMOVED***"/>
       <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
+      <property name="eclipselink.ddl-generation.output-mode" value="both"/>
     </properties>
   </persistence-unit>
 </persistence>

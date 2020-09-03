@@ -26,10 +26,13 @@ import javax.validation.constraints.NotNull;
  */
 @Entity(name = "persons")
 @NamedQueries({
-	@NamedQuery(name = Person.FIND_ALL_PERSONS, query = "SELECT p FROM persons p")})
+	@NamedQuery(name = Person.FIND_ALL_PERSONS, query = "SELECT p FROM persons p"),
+	@NamedQuery(name = Person.USER_BY_EMAIL, query = "SELECT p FROM persons p WHERE p.email LIKE :email")
+})
 public class Person implements Serializable {
 
-	public final static String FIND_ALL_PERSONS = "findAllPersons";
+	public final static String FIND_ALL_PERSONS = "Person.findAllPersons";
+	public final static String USER_BY_EMAIL = "Person.findPersonByEmail";
 
 	@Id
 	@Column(name = "id")
@@ -40,6 +43,11 @@ public class Person implements Serializable {
 	@NotNull
 	@Column(name = "email")
 	private String email;
+	
+	@NotNull
+	@JsonbTransient	
+	@Column(name = "is_admin")
+	private Boolean isAdmin;
 
 	@JsonbTransient
 	@Column(name = "password")
@@ -53,6 +61,7 @@ public class Person implements Serializable {
 
 	@Column(name = "mobile_phone")
 	private String mobilePhone;
+
 
 	/**
 	 * REFERENCING SIDE *
@@ -89,6 +98,15 @@ public class Person implements Serializable {
 		this.email = email;
 	}
 
+	public Boolean getIsAdmin() {
+		return isAdmin;
+	}
+
+	public void setIsAdmin(Boolean isAdmin) {
+		this.isAdmin = isAdmin;
+	}
+	
+
 	public String getPassword() {
 		return password;
 	}
@@ -119,6 +137,14 @@ public class Person implements Serializable {
 
 	public void setMobilePhone(String mobilePhone) {
 		this.mobilePhone = mobilePhone;
+	}
+
+	public List<Purchase> getDonePurchases() {
+		return donePurchases;
+	}
+
+	public List<Item> getOwnedItems() {
+		return ownedItems;
 	}
 
 }

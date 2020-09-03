@@ -7,8 +7,6 @@ package no.nilsjarh.ntnu.mobapp4.domain;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -19,7 +17,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
+import javax.persistence.Temporal;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -30,7 +31,12 @@ import jdk.internal.jline.internal.Nullable;
  * @author nils
  */
 @Entity(name = "items")
+@NamedQueries({
+	@NamedQuery(name = Item.FIND_ALL_ITEMS, query = "SELECT i FROM items i")})
 public class Item implements Serializable {
+	
+	public final static String FIND_ALL_ITEMS = "findAllItems";
+	
 	@Id
 	@Column(name = "id", nullable = false)
 	@GeneratedValue (strategy = GenerationType.AUTO)
@@ -46,14 +52,17 @@ public class Item implements Serializable {
 	
 	@NotNull
 	@Column(name = "created_time", nullable = false)
-	private Timestamp createdTime;
+	@Temporal(javax.persistence.TemporalType.DATE)
+	private Date createdTime;
 	
 	@Column(name = "publish_time")
-	private Timestamp publishTime;
+	@Temporal(javax.persistence.TemporalType.DATE)
+	private Date publishTime;
 	
 	@Future
 	@Column(name = "expire_time")
-	private Timestamp expireTime;
+	@Temporal(javax.persistence.TemporalType.DATE)
+	private Date expireTime;
 	
 	@Positive
 	@Column(name = "price_nok")
@@ -74,12 +83,12 @@ public class Item implements Serializable {
 	private Purchase purchase;
 	
 	public Item() {
-		this.createdTime = Timestamp.from(Instant.MIN);
+		this.createdTime = new Date();
 		
 	}
 	
 	public Item(String title, String descr, Person seller) {
-		this.createdTime = Timestamp.from(Instant.MIN);
+		this.createdTime = new Date();
 		this.title = title;
 		this.description = descr;
 		this.sellerPerson = seller;
@@ -89,7 +98,7 @@ public class Item implements Serializable {
 		return id;
 	}
 
-	public Timestamp getCreatedTime() {
+	public Date getCreatedTime() {
 		return createdTime;
 	}
 
@@ -109,19 +118,19 @@ public class Item implements Serializable {
 		this.description = description;
 	}
 
-	public Timestamp getPublishTime() {
+	public Date getPublishTime() {
 		return publishTime;
 	}
 
-	public void setPublishTime(Timestamp publishTime) {
+	public void setPublishTime(Date publishTime) {
 		this.publishTime = publishTime;
 	}
 
-	public Timestamp getExpireTime() {
+	public Date getExpireTime() {
 		return expireTime;
 	}
 
-	public void setExpireTime(Timestamp expireTime) {
+	public void setExpireTime(Date expireTime) {
 		this.expireTime = expireTime;
 	}
 
