@@ -39,6 +39,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.persistence.Query;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import no.nilsjarh.ntnu.mobapp4.domain.User;
 import no.nilsjarh.ntnu.mobapp4.resources.DatasourceProducer;
@@ -176,8 +177,35 @@ public class AuthenticationService {
     @POST
     @Path("create")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createUser(@FormParam("email") String email, @FormParam("pwd") String pwd) {	
+    public Response createUser(@HeaderParam("email") String email, @HeaderParam("pwd") String pwd) {	
+	System.out.print("REST-POST: params: '" + email + "','" + pwd +"'\n");
 	Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
+	query.setParameter("email", email);
+	System.out.print("JPA-QUERY: \n" + query.toString());
+	List<User> foundUsers = query.getResultList();
+	
+        if (foundUsers.isEmpty() == false) {
+            log.log(Level.INFO, "User already exists {0}",
+		    email);
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        } else {
+            User u = new User();
+            u.setEmail(email);
+            u.setPassword(hasher.generate(pwd.toCharArray()));
+            Group usergroup = em.find(Group.class, Group.USER);
+            u.getGroups().add(usergroup);
+            return Response.ok(em.merge(u)).build();
+        }
+    }
+    
+    @POST
+    @Path("form-create")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createUserFromForm(@FormParam("email") String email, @FormParam("pwd") String pwd) {	
+	System.out.print("REST-POST: params: '" + email + "','" + pwd +"'\n");
+	Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
+	query.setParameter("email", email);
+	System.out.print("JPA-QUERY: \n" + query.toString());
 	List<User> foundUsers = query.getResultList();
 	
         if (foundUsers.isEmpty() == false) {

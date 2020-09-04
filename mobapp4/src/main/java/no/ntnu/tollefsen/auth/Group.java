@@ -40,7 +40,6 @@ public class Group implements Serializable {
 	/**
 	 * CROSS-JOIN - REFERENCE *
 	 */
-	
 	@JsonbTransient
 	@Getter
 	@ManyToMany
