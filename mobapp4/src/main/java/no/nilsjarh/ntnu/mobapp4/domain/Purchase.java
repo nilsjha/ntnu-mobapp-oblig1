@@ -6,9 +6,8 @@
 package no.nilsjarh.ntnu.mobapp4.domain;
 
 import java.io.Serializable;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.util.Date;
+import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,12 +18,20 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
-import javax.validation.constraints.NotNull;
+import javax.persistence.PrePersist;
+import javax.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  *
  * @author nils
  */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "purchases")
 public class Purchase implements Serializable {
 	@Id
@@ -32,53 +39,27 @@ public class Purchase implements Serializable {
 	@GeneratedValue (strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@NotNull
+	@NotEmpty
 	@Column(name = "purchase_time")
-	private Timestamp purchaseTime;
+	private Date purchaseDate;
+	
+	@PrePersist
+	protected void onCreate() {
+		this.purchaseDate = new Date();
+	}
 	
 	/** OWNING SIDE **/
 	@ManyToOne(fetch = FetchType.LAZY,  cascade = CascadeType.DETACH)
 	@JoinColumn(name = "buyer_user_id", referencedColumnName = "id",
 		nullable = false)
-	@NotNull
+	@NotEmpty
 	private User buyerUser;
 	
 	
 	/** REFERNENCING SIDE **/
+	@JsonbTransient
+	@Getter
 	@OneToOne(mappedBy = "purchase")
-	private Item item;
-	
-	public Purchase() {
-		this.purchaseTime = Timestamp.from(Instant.MIN);
-	}
-	
-	public Purchase(User buyerUser) {
-		this.purchaseTime = Timestamp.from(Instant.MIN);
-		this.buyerUser = buyerUser;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public Timestamp getPurchaseTime() {
-		return purchaseTime;
-	}
-	
-
-	public User getBuyerUser() {
-		return buyerUser;
-	}
-
-	public void setBuyerUser(User buyerUser) {
-		this.buyerUser = buyerUser;
-	}
-
-	public Item getItem() {
-		return item;
-	}
-	
-	
-	
+	private Item item;	
 	
 }

@@ -32,6 +32,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import no.ntnu.tollefsen.auth.Group;
 
@@ -110,12 +111,16 @@ public class User implements Serializable {
 	/**
 	 * REFERENCING SIDE *
 	 */
+	@JsonbTransient
+	@Getter
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "buyerUser")
 	private List<Purchase> donePurchases;
 
 	/**
 	 * REFERENCING SIDE *
 	 */
+	@JsonbTransient
+	@Getter
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "sellerUser")
 	private List<Item> ownedItems;
 
