@@ -76,11 +76,11 @@ public class User implements Serializable {
 
 	@Column(name = "created_date")
 	@Temporal(javax.persistence.TemporalType.DATE)
-	Date created;
+	Date createdDate;
 
 	@PrePersist
 	protected void onCreate() {
-		created = new Date();
+		createdDate = new Date();
 	}
 
 	@Enumerated(EnumType.STRING)
