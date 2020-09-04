@@ -12,6 +12,7 @@ import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import no.nilsjarh.ntnu.mobapp4.domain.User;
 
@@ -41,6 +42,7 @@ public class Group implements Serializable {
 	 */
 	
 	@JsonbTransient
+	@Getter
 	@ManyToMany
 	@JoinTable(name = "user_has_group",
 		joinColumns = @JoinColumn(
