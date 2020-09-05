@@ -124,11 +124,11 @@ public class User implements Serializable {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "sellerUser")
 	private List<Item> ownedItems;
 
-	public List<Group> getGroupMembership() {
-		if (groups == null) {
-			groups = new ArrayList<>();
+	public List<Group> getGroups() {
+		if (this.groups == null) {
+			this.groups = new ArrayList<>();
 		}
-		return groups;
+		return this.groups;
 
 	}
 
