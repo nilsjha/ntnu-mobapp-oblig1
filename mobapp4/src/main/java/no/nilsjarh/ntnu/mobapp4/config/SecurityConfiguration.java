@@ -13,8 +13,8 @@ import org.eclipse.microprofile.auth.LoginConfig;
  */
 @DatabaseIdentityStoreDefinition(
     dataSourceLookup=DatasourceProducer.JNDI_NAME,
-    callerQuery="SELECT password FROM users WHERE id = ?",
-    groupsQuery="SELECT name FROM user_has_group WHERE userid  = ?",
+    callerQuery="SELECT password FROM users WHERE email LIKE ?",
+    groupsQuery="SELECT name FROM user_has_group WHERE id  = ?",
     hashAlgorithm = PasswordHash.class,
     priority = 80)
 @DeclareRoles({Group.ADMIN,Group.USER})

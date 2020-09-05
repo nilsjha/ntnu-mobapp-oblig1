@@ -117,7 +117,8 @@ public class AuthenticationService {
             @QueryParam("email") @NotBlank String email,
             @QueryParam("pwd") @NotBlank String pwd,
             @Context HttpServletRequest request) {
-        CredentialValidationResult result = identityStoreHandler.validate(
+
+	    CredentialValidationResult result = identityStoreHandler.validate(
                 new UsernamePasswordCredential(email, pwd));
 
         if (result.getStatus() == CredentialValidationResult.Status.VALID) {
