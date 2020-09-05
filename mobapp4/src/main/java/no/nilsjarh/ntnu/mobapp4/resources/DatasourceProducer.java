@@ -22,7 +22,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
     portNumber      = 5432,
     databaseName    = "${MPCONFIG=dataSource.databaseName}",
     user            = "${MPCONFIG=dataSource.user}",
-    password        = "${MPCONFIG=dataSource.password}"
+    password        = "${MPCONFIG=dataSource.password}",
+    minPoolSize     = 10,
+    maxPoolSize     = 50
 )
 
 public class DatasourceProducer {
