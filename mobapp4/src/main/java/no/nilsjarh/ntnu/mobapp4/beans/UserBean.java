@@ -133,7 +133,6 @@ public class UserBean {
 	public User addGrRoup(User user, String role, boolean add) {
 	
 		System.err.println("%%%%%%%%%%%%%%%%%%% HAUNTED METHOD BEGIN %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-		System.err.println("%%%%%%%%%%%%%%%%%%% HAUNTED METHOD END %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
 		System.err.println("%%%%%%%%%%%%%%%%%%% DATABASE LOGIC IS REMOVED, YET IT UPDATES THE DATABASE GROUPS%%%%%%%%%%%%%%%%%%%%%");
 		System.out.println("=== INVOKING EJB: GROUP MGMT ===");
 		Group groupToChange = findGroupByName(role);
