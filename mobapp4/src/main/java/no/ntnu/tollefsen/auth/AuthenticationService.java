@@ -104,6 +104,24 @@ public class AuthenticationService {
 	@Inject
 	JsonWebToken principal;
 
+	public User findUserByEmail(String email) {
+		Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
+		query.setParameter("email", email);
+
+		List<User> foundUsers = query.getResultList();
+
+		if (foundUsers.size() == 1) {
+			User u = foundUsers.get(0);
+			System.out.println("JPA-FOUND-USER");
+			System.out.println("Id: " + u.getId().getClass() + ":" + u.getId() + "\n");
+			System.out.println("Email: " + u.getEmail().getClass() + ":" + u.getEmail() + "\n");
+			System.out.println("Password: " + u.getPassword().getClass() + ":" + u.getPassword() + "\n");
+			return u;
+		} else {
+			return null;
+		}
+	}
+
 	/**
 	 *
 	 * @param email
@@ -118,24 +136,13 @@ public class AuthenticationService {
 		@QueryParam("pwd") @NotBlank String pwd,
 		@Context HttpServletRequest request) {
 
-		Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
-		query.setParameter("email", email);
+		User exsistingUser = findUserByEmail(email);
 
-		List<User> foundUsers = query.getResultList();
-
-		if (foundUsers.size() == 1) {
-			User u = foundUsers.get(0);
-			System.out.println("LOGON-FOUND-USER");
-			System.out.println("Id: " + u.getId() + "\n");
-			System.out.println("Email: " + u.getEmail() + "\n");
-			System.out.println("Password: " + u.getPassword() + "\n");
-
-
+		if (!(exsistingUser == null)) {
 			UsernamePasswordCredential ucred
-				= new UsernamePasswordCredential(u.getId().toString(), pwd);
-			
+				= new UsernamePasswordCredential(exsistingUser.getId(), pwd);
 
-			CredentialValidationResult result 
+			CredentialValidationResult result
 				= identityStoreHandler.validate(ucred);
 
 			if (result.getStatus() == CredentialValidationResult.Status.VALID) {
@@ -146,9 +153,10 @@ public class AuthenticationService {
 					.header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
 					.build();
 			}
-
 		}
-		return Response.status(Response.Status.UNAUTHORIZED).build();
+
+		return Response.status(Response.Status.UNAUTHORIZED)
+			.build();
 	}
 
 	/**
@@ -190,78 +198,45 @@ public class AuthenticationService {
 	 * AUSER table when doing an authentication.
 	 *
 	 * @param email
-	 * @param pwd
+	 * @param password
 	 * @return
 	 */
-	@POST
-	@Path("create")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response createUser(@HeaderParam("email") String email, @HeaderParam("pwd") String pwd) {
-		System.out.print("REST-POST: params: '" + email + "','" + pwd + "'\n");
-		Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
-		query.setParameter("email", email);
-		System.out.print("JPA-QUERY: \n" + query.toString());
-		List<User> foundUsers = query.getResultList();
+	public Response createUser(String email, String password) {
+		System.out.println(" === CREATE USER ===");
+		System.out.print("Params: '" + email + "','" + password + "'\n");
+		User u = findUserByEmail(email);
 
-		if (foundUsers.isEmpty() == false) {
+		if (!(u == null)) {
+			System.out.println("LOGON-FOUND-USER");
+			System.out.println("Id: " + u.getId().getClass() + ":" + u.getId() + "\n");
+			System.out.println("Email: " + u.getEmail().getClass() + ":" + u.getEmail() + "\n");
+			System.out.println("Password: " + u.getPassword().getClass() + ":" + u.getPassword() + "\n");
 			log.log(Level.INFO, "User already exists {0}",
 				email);
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		} else {
-			User u = new User();
-			u.setEmail(email);
-			u.setPassword(hasher.generate(pwd.toCharArray()));
-			Group usergroup = em.find(Group.class, Group.USER);
-			u.getGroups().add(usergroup);
-			return Response.ok(em.merge(u)).build();
+			User newUser = new User();
+			newUser.setEmail(email);
+			newUser.setPassword(hasher.generate(password.toCharArray()));
+			Group usergroup = em.find(Group.class,
+				 Group.USER);
+			newUser.getGroups().add(usergroup);
+			return Response.ok(em.merge(newUser)).build();
 		}
+	}
+
+	@POST
+	@Path("create")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response createUserService(@HeaderParam("email") String email, @HeaderParam("pwd") String pwd) {
+		return createUser(email, pwd);
 	}
 
 	@POST
 	@Path("form-create")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response createUserFromForm(@FormParam("email") String email, @FormParam("pwd") String pwd) {
-		System.out.print("REST-POST: params: '" + email + "','" + pwd + "'\n");
-		Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
-		query.setParameter("email", email);
-		System.out.print("JPA-QUERY: \n" + query.toString());
-		List<User> foundUsers = query.getResultList();
-
-		if (foundUsers.isEmpty() == false) {
-			log.log(Level.INFO, "User already exists {0}",
-				email);
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			User u = new User();
-			u.setEmail(email);
-			u.setPassword(hasher.generate(pwd.toCharArray()));
-			Group usergroup = em.find(Group.class, Group.USER);
-			u.getGroups().add(usergroup);
-			return Response.ok(em.merge(u)).build();
-		}
-	}
-
-	public User createUser(String email, String pwd, String firstName, String lastName) {
-		Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
-		List<User> foundUsers = query.getResultList();
-
-		if (foundUsers.isEmpty() == false) {
-			User ex = foundUsers.get(0);
-
-			log.log(Level.INFO, "User {0} already exists", ex.getId());
-			log.log(Level.INFO, "email: ", ex.getEmail());
-			throw new IllegalArgumentException(
-				"User " + email + " already exists");
-		} else {
-			User u = new User();
-			u.setEmail(email);
-			u.setPassword(hasher.generate(pwd.toCharArray()));
-			u.setFirstName(firstName);
-			u.setLastName(lastName);
-			Group usergroup = em.find(Group.class, Group.USER);
-			u.getGroups().add(usergroup);
-			return em.merge(u);
-		}
+	public Response createUserFormService(@FormParam("email") String email, @FormParam("pwd") String pwd) {
+		return createUser(email, pwd);
 	}
 
 	/**
@@ -273,7 +248,8 @@ public class AuthenticationService {
 	@RolesAllowed(value = {Group.USER})
 	@Produces(MediaType.APPLICATION_JSON)
 	public User getCurrentUser() {
-		return em.find(User.class, principal.getName());
+		return em.find(User.class,
+			 principal.getName());
 	}
 
 	/**
@@ -293,7 +269,7 @@ public class AuthenticationService {
 		try (Connection c = dataSource.getConnection();
 			PreparedStatement psg = c.prepareStatement(INSERT_USERGROUP)) {
 			psg.setString(1, role);
-			psg.setLong(2, getCurrentUser().getId());
+			psg.setString(2, getCurrentUser().getId());
 			psg.executeUpdate();
 		} catch (SQLException ex) {
 			log.log(Level.SEVERE, null, ex);
@@ -375,7 +351,8 @@ public class AuthenticationService {
 				new Object[]{authuser, email});
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		} else {
-			User u = em.find(User.class, email);
+			User u = em.find(User.class,
+				 email);
 			u.setPassword(hasher.generate(password.toCharArray()));
 			em.merge(u);
 			return Response.ok().build();
