@@ -116,11 +116,11 @@ public class AuthenticationService {
 	 * @param request
 	 * @return
 	 */
-	@GET
+	@POST
 	@Path("login")
 	public Response login(
-		@QueryParam("email") @NotBlank String email,
-		@QueryParam("pwd") @NotBlank String pwd,
+		@FormParam("email") @NotBlank String email,
+		@FormParam("pwd") @NotBlank String pwd,
 		@Context HttpServletRequest request) {
 		System.out.println("=== INVOKING REST-AUTH: LOGON ===");
 		System.out.println("Query parameters");
