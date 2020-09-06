@@ -43,6 +43,8 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import no.nilsjarh.ntnu.mobapp4.domain.User;
 import no.nilsjarh.ntnu.mobapp4.resources.DatasourceProducer;
+import no.nilsjarh.ntnu.mobapp4.beans.*;
+
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -103,24 +105,10 @@ public class AuthenticationService {
 
 	@Inject
 	JsonWebToken principal;
+	
+	@Inject
+	UserBean userBean;
 
-	public User findUserByEmail(String email) {
-		Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
-		query.setParameter("email", email);
-
-		List<User> foundUsers = query.getResultList();
-
-		if (foundUsers.size() == 1) {
-			User u = foundUsers.get(0);
-			System.out.println("JPA-FOUND-USER");
-			System.out.println("Id: " + u.getId().getClass() + ":" + u.getId() + "\n");
-			System.out.println("Email: " + u.getEmail().getClass() + ":" + u.getEmail() + "\n");
-			System.out.println("Password: " + u.getPassword().getClass() + ":" + u.getPassword() + "\n");
-			return u;
-		} else {
-			return null;
-		}
-	}
 
 	/**
 	 *
@@ -136,7 +124,7 @@ public class AuthenticationService {
 		@QueryParam("pwd") @NotBlank String pwd,
 		@Context HttpServletRequest request) {
 
-		User exsistingUser = findUserByEmail(email);
+		User exsistingUser = userBean.findUserByEmail(email);
 
 		if (!(exsistingUser == null)) {
 			UsernamePasswordCredential ucred
@@ -204,13 +192,13 @@ public class AuthenticationService {
 	public Response createUser(String email, String password) {
 		System.out.println(" === CREATE USER ===");
 		System.out.print("Params: '" + email + "','" + password + "'\n");
-		User u = findUserByEmail(email);
+		User u = userBean.findUserByEmail(email);
 
 		if (!(u == null)) {
 			System.out.println("LOGON-FOUND-USER");
-			System.out.println("Id: " + u.getId().getClass() + ":" + u.getId() + "\n");
-			System.out.println("Email: " + u.getEmail().getClass() + ":" + u.getEmail() + "\n");
-			System.out.println("Password: " + u.getPassword().getClass() + ":" + u.getPassword() + "\n");
+			System.out.println("Id: " + u.getId().getClass() + ":" + u.getId());
+			System.out.println("Email: " + u.getEmail().getClass() + ":" + u.getEmail());
+			System.out.println("Password: " + u.getPassword().getClass() + ":" + u.getPassword());
 			log.log(Level.INFO, "User already exists {0}",
 				email);
 			return Response.status(Response.Status.BAD_REQUEST).build();
