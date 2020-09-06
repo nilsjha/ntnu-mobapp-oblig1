@@ -45,7 +45,6 @@ import no.nilsjarh.ntnu.mobapp4.domain.User;
 import no.nilsjarh.ntnu.mobapp4.resources.DatasourceProducer;
 import no.nilsjarh.ntnu.mobapp4.beans.*;
 
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -105,10 +104,9 @@ public class AuthenticationService {
 
 	@Inject
 	JsonWebToken principal;
-	
+
 	@Inject
 	UserBean userBean;
-
 
 	/**
 	 *
@@ -179,37 +177,14 @@ public class AuthenticationService {
 		}
 	}
 
-	/**
-	 * Does an insert into the users and user_has_group tables. It creates a
-	 * SHA-256 hash of the password and Base64 encodes it before the u is
-	 * created in the database. The authentication system will read the
-	 * AUSER table when doing an authentication.
-	 *
-	 * @param email
-	 * @param password
-	 * @return
-	 */
-	public Response createUser(String email, String password) {
-		System.out.println(" === CREATE USER ===");
-		System.out.print("Params: '" + email + "','" + password + "'\n");
-		User u = userBean.findUserByEmail(email);
+	private Response buildCreatedUserResponse(String email, String pwd) {
+		User createdUser = userBean.createUser(email, pwd);
+		if (createdUser == null) {
 
-		if (!(u == null)) {
-			System.out.println("LOGON-FOUND-USER");
-			System.out.println("Id: " + u.getId().getClass() + ":" + u.getId());
-			System.out.println("Email: " + u.getEmail().getClass() + ":" + u.getEmail());
-			System.out.println("Password: " + u.getPassword().getClass() + ":" + u.getPassword());
-			log.log(Level.INFO, "User already exists {0}",
-				email);
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		} else {
-			User newUser = new User();
-			newUser.setEmail(email);
-			newUser.setPassword(hasher.generate(password.toCharArray()));
-			Group usergroup = em.find(Group.class,
-				 Group.USER);
-			newUser.getGroups().add(usergroup);
-			return Response.ok(em.merge(newUser)).build();
+
+			return Response.ok(createdUser).build();
 		}
 	}
 
@@ -217,14 +192,14 @@ public class AuthenticationService {
 	@Path("create")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createUserService(@HeaderParam("email") String email, @HeaderParam("pwd") String pwd) {
-		return createUser(email, pwd);
+		return buildCreatedUserResponse(email, pwd);
 	}
 
 	@POST
 	@Path("form-create")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createUserFormService(@FormParam("email") String email, @FormParam("pwd") String pwd) {
-		return createUser(email, pwd);
+		return buildCreatedUserResponse(email, pwd);
 	}
 
 	/**
@@ -237,7 +212,7 @@ public class AuthenticationService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public User getCurrentUser() {
 		return em.find(User.class,
-			 principal.getName());
+			principal.getName());
 	}
 
 	/**
@@ -340,7 +315,7 @@ public class AuthenticationService {
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		} else {
 			User u = em.find(User.class,
-				 email);
+				email);
 			u.setPassword(hasher.generate(password.toCharArray()));
 			em.merge(u);
 			return Response.ok().build();
