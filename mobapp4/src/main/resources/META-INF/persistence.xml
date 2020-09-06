@@ -6,8 +6,9 @@
     <class>no.nilsjarh.ntnu.mobapp4.domain.Item</class>
     <class>no.nilsjarh.ntnu.mobapp4.domain.Purchase</class>
     <class>no.nilsjarh.ntnu.mobapp4.domain.User</class>
+    <class>no.ntnu.tollefsen.auth.Group</class>
     <properties>
-      <property name="javax.persistence.schema-generation.database.action" value="create"/>
+      <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
       <property name="eclipselink.ddl-generation.output-mode" value="both"/>
     </properties>
   </persistence-unit>

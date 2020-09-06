@@ -26,6 +26,7 @@ import javax.validation.constraints.Future;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -35,13 +36,16 @@ import lombok.NoArgsConstructor;
  */
 @Entity(name = "items")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 @NamedQueries({
-	@NamedQuery(name = Item.FIND_ALL_ITEMS, query = "SELECT i FROM items i")})
+	@NamedQuery(name = Item.FIND_ALL_ITEMS, query = "SELECT i FROM items i"),
+	@NamedQuery(name = Item.FIND_ITEMS_BY_USER,
+		query = "SELECT i FROM items i WHERE i.sellerUser LIKE :seller")
+})
 public class Item implements Serializable {
 
 	public final static String FIND_ALL_ITEMS = "findAllItems";
+	public final static String FIND_ITEMS_BY_USER = "findItemsByUser";
 
 	@Id
 	@Column(name = "id", nullable = false)
@@ -53,6 +57,10 @@ public class Item implements Serializable {
 	private String title;
 
 	@NotEmpty
+	@Positive
+	@Column(name = "price_nok")
+	private BigDecimal priceNok;
+
 	@Column(name = "description")
 	private String description;
 
@@ -74,10 +82,6 @@ public class Item implements Serializable {
 	@Temporal(javax.persistence.TemporalType.DATE)
 	private Date expireDate;
 
-	@Positive
-	@Column(name = "price_nok")
-	private BigDecimal priceNok;
-
 	/**
 	 * OWNER SIDE *
 	 */
@@ -94,5 +98,10 @@ public class Item implements Serializable {
 	@JoinColumn(name = "purchase_id", referencedColumnName = "id")
 	private Purchase purchase;
 
-	
+	public Item(User owner, String title, BigDecimal priceNok) {
+		this.sellerUser = owner;
+		this.title = title;
+		this.priceNok = priceNok;
+	}
+	 
 }
