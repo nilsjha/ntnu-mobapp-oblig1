@@ -43,8 +43,7 @@ public class AuthRunOnStartup {
 			System.out.println("You should have not seen this, as this shall never be NULL on any DB action taken");
 
 		}
-		System.out.println("Adding duplcate group, should be handled by logic and give no error :)");
-		userBean.addGrRoup(admin, "admin", true);
+
 
 
 	}

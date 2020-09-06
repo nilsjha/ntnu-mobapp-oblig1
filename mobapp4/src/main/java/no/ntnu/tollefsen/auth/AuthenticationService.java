@@ -120,9 +120,9 @@ public class AuthenticationService {
 		@FormParam("pwd") @NotBlank String pwd,
 		@Context HttpServletRequest request) {
 		System.out.println("=== INVOKING REST-AUTH: LOGON ===");
-		System.out.println("Query parameters");
-		System.out.println("- Email.............................: " + email);
-		System.out.println("- Password..........................: " + pwd);
+		System.out.print("Query parameters:");
+		System.out.print("email:" + email);
+		System.out.println(", password:" + pwd);
 
 		User exsistingUser = userBean.findUserByEmail(email);
 
@@ -185,6 +185,10 @@ public class AuthenticationService {
 	}
 
 	private Response buildCreatedUserResponse(String email, String pwd) {
+		System.out.println("=== INVOKING REST-AUTH: CREATE USER ===");
+		System.out.print("Query parameters:");
+		System.out.print("email:" + email);
+		System.out.println(", password:" + pwd);
 		User createdUser = userBean.createUser(email, pwd);
 		if (createdUser == null) {
 
@@ -232,9 +236,13 @@ public class AuthenticationService {
 	@Path("addrole")
 	@RolesAllowed(value = {Group.ADMIN})
 	public Response addRole(@QueryParam("email") String email, @QueryParam("role") String role) {
+		System.out.println("=== INVOKING REST-AUTH: ADD GROUP ===");
+		System.out.print("Query parameters:");
+		System.out.print("email:" + email);
+		System.out.println(", role:" + role);
 		User foundUser = userBean.findUserByEmail(email);
 		if (foundUser != null) {
-			if (!(userBean.addGrRoup(foundUser, role, false) == null)) {
+			if (!(userBean.addGrRoup(foundUser, role, true) == null)) {
 				return Response.ok().build();
 			}
 		}
@@ -251,9 +259,13 @@ public class AuthenticationService {
 	@Path("removerole")
 	@RolesAllowed(value = {Group.ADMIN})
 	public Response removeRole(@QueryParam("email") String email, @QueryParam("role") String role) {
+		System.out.println("=== INVOKING REST-AUTH: REMOVE GROUP ===");
+		System.out.print("Query parameters:");
+		System.out.print("email:" + email);
+		System.out.println(", role:" + role);
 		User foundUser = userBean.findUserByEmail(email);
 		if (foundUser != null) {
-			if (!(userBean.addGrRoup(foundUser, role, true) == null)) {
+			if (!(userBean.addGrRoup(foundUser, role, false) == null)) {
 				return Response.ok().build();
 			}
 		}
@@ -275,9 +287,9 @@ public class AuthenticationService {
 		@QueryParam("pwd") String password,
 		@Context SecurityContext sc) {
 		System.out.println("=== INVOKING REST-AUTH: CHANGE PASSWORD ===");
-		System.out.println("Query parameters");
-		System.out.println("- Email.............................: " + emailAccess);
-		System.out.println("- Password..........................: " + password);
+		System.out.print("Query parameters:");
+		System.out.print("email:" + emailAccess);
+		System.out.println(", role:" + password);
 
 		User accessUser = userBean.findUserByEmail(emailAccess);
 		if (accessUser == null) {

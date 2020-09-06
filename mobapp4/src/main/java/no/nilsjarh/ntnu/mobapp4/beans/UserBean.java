@@ -54,7 +54,8 @@ public class UserBean {
 
 	public User findUserById(String id) {
 		System.out.println("=== INVOKING EJB: FIND USER ===");
-		System.out.println("Query parameters - id: " + id);
+		System.out.print("Query parameters:");
+		System.out.println("id:" + id);
 		User found = em.find(User.class, id);
 
 		if (found == null) {
@@ -73,7 +74,8 @@ public class UserBean {
 		System.out.println("=== INVOKING EJB: FIND USER ===");
 		Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
 		query.setParameter("email", email);
-		System.out.println("Query parameters - email: " + email);
+		System.out.print("Query parameters:");
+		System.out.println("mail:" + email);
 		List<User> foundUsers = query.getResultList();
 		if (foundUsers.size() == 1) {
 			User u = foundUsers.get(0);
@@ -102,9 +104,9 @@ public class UserBean {
 	 */
 	public User createUser(String email, String password) {
 		System.out.println("=== INVOKING EJB: CREATE USER ===");
-		System.out.println("Query parameters");
-		System.out.println("- Email............: " + email);
-		System.out.println("- Password.........: " + password);
+		System.out.print("Query parameters:");
+		System.out.print("mail:" + email);
+		System.out.println(", pass:" + password);
 		User u = findUserByEmail(email);
 
 		if (!(u == null)) {
@@ -135,6 +137,9 @@ public class UserBean {
 		System.err.println("%%%%%%%%%%%%%%%%%%% HAUNTED METHOD BEGIN %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
 		System.err.println("%%%%%%%%%%%%%%%%%%% DATABASE LOGIC IS REMOVED, YET IT UPDATES THE DATABASE GROUPS%%%%%%%%%%%%%%%%%%%%%");
 		System.out.println("=== INVOKING EJB: GROUP MGMT ===");
+		System.out.print("Query parameters:");
+		System.out.print("user:" + user);
+		System.out.println(", role:" + role);
 		Group groupToChange = findGroupByName(role);
 		if (groupToChange == null) {
 			System.out.println("- Status...........: " + "Invalid group");
