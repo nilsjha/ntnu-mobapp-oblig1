@@ -46,6 +46,7 @@ import no.nilsjarh.ntnu.mobapp4.resources.DatasourceProducer;
 import no.nilsjarh.ntnu.mobapp4.beans.*;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.jwt.Claims;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
@@ -121,6 +122,10 @@ public class AuthenticationService {
 		@QueryParam("email") @NotBlank String email,
 		@QueryParam("pwd") @NotBlank String pwd,
 		@Context HttpServletRequest request) {
+		System.out.println("=== INVOKING REST-AUTH: LOGON ===");
+		System.out.println("Query parameters");
+		System.out.println("- Email.............................: " + email);
+		System.out.println("- Password..........................: " + pwd);
 
 		User exsistingUser = userBean.findUserByEmail(email);
 
@@ -134,12 +139,17 @@ public class AuthenticationService {
 			if (result.getStatus() == CredentialValidationResult.Status.VALID) {
 				String token = issueToken(result.getCallerPrincipal().getName(),
 					result.getCallerGroups(), request);
+				
+		System.out.println("- Logged on with ID...............: " + exsistingUser.getId());
+		System.out.println("=== END REST-AUTH: LOGON ===\n");
 				return Response
 					.ok(token)
 					.header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
 					.build();
 			}
 		}
+		System.out.println("- Unable to logon..................: " + email);
+		System.out.println("=== END REST-AUTH: LOGON ===\n");
 
 		return Response.status(Response.Status.UNAUTHORIZED)
 			.build();
@@ -291,7 +301,7 @@ public class AuthenticationService {
 
 	/**
 	 *
-	 * @param email
+	 * @param emailAccess
 	 * @param password
 	 * @param sc
 	 * @return
@@ -299,25 +309,46 @@ public class AuthenticationService {
 	@PUT
 	@Path("changepassword")
 	@RolesAllowed(value = {Group.USER})
-	public Response changePassword(@QueryParam("email") String email,
+	public Response changePassword(
+		@QueryParam("email") String emailAccess,
 		@QueryParam("pwd") String password,
 		@Context SecurityContext sc) {
-		String authuser = sc.getUserPrincipal() != null ? sc.getUserPrincipal().getName() : null;
-		if (authuser == null || email == null || (password == null || password.length() < 3)) {
-			log.log(Level.SEVERE, "Failed to change password on u {0}", email);
+		System.out.println("=== INVOKING REST-AUTH: CHANGE PASSWORD ===");
+		System.out.println("Query parameters");
+		System.out.println("- Email.............................: " + emailAccess);
+		System.out.println("- Password..........................: " + password);
+
+		User accessUser = userBean.findUserByEmail(emailAccess);
+		if (accessUser == null) {
+			System.out.println("- Access User.......................: " + "<No User>");
+			System.out.println("=== END REST-AUTH: CHANGE PASSWORD ===\n");
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		}
 
-		if (authuser.compareToIgnoreCase(email) != 0 && !sc.isUserInRole(Group.ADMIN)) {
+		String id = accessUser.getId();
+		System.out.println("- Access User.......................: " + id);
+
+		String authuser = sc.getUserPrincipal() != null ? sc.getUserPrincipal().getName() : null;
+
+		if ((password == null || password.length() < 3)) {
+			log.log(Level.SEVERE, " #1 Failed to change password on u {0}", id);
+			System.out.println("- Password unsatisfied..............: " + password);
+			System.out.println("=== END REST-AUTH: CHANGE PASSWORD ===\n");
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+
+		if (authuser.compareToIgnoreCase(id) != 0 && !sc.isUserInRole(Group.ADMIN)) {
 			log.log(Level.SEVERE,
-				"No admin access for {0}. Failed to change password on u {1}",
-				new Object[]{authuser, email});
+				"#2 No admin access for {0}. Failed to change password on u {1}",
+				new Object[]{authuser, id});
+			System.out.println("- GroupMembership unsatisfied.......: " + accessUser.getGroups().toString());
+			System.out.println("=== END REST-AUTH: CHANGE PASSWORD ===\n");
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		} else {
-			User u = em.find(User.class,
-				email);
-			u.setPassword(hasher.generate(password.toCharArray()));
-			em.merge(u);
+			accessUser.setPassword(hasher.generate(password.toCharArray()));
+			em.merge(accessUser);
+			System.out.println("- Password updated..................: " + password);
+			System.out.println("=== END REST-AUTH: CHANGE PASSWORD ===\n");
 			return Response.ok().build();
 		}
 	}

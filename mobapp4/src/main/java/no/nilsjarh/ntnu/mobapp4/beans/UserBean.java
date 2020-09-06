@@ -20,6 +20,7 @@ import no.nilsjarh.ntnu.mobapp4.domain.*;
 import no.nilsjarh.ntnu.mobapp4.resources.DatasourceProducer;
 import no.ntnu.tollefsen.auth.Group;
 import lombok.extern.java.Log;
+
 /**
  *
  * @author nils
@@ -41,32 +42,34 @@ public class UserBean {
 	 */
 	@PersistenceContext
 	EntityManager em;
-	
+
 	@Inject
 	PasswordHash hasher;
-	
-	
+
 	public User findUserByEmail(String email) {
-		
-			System.out.println("=== INVOKING EJB: FIND USER ===");
+		System.out.println("=== INVOKING EJB: FIND USER ===");
 		Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
 		query.setParameter("email", email);
+		System.out.println("Query parameters");
+			System.out.println("Email............: " + email);
 		List<User> foundUsers = query.getResultList();
 		if (foundUsers.size() == 1) {
 			User u = foundUsers.get(0);
-			System.out.println("**FOUND - RETURN USER**");
-			System.out.println("Id: " + u.getId().getClass() + ":" + u.getId());
-			System.out.println("Email: " + u.getEmail().getClass() + ":" + u.getEmail());
-			System.out.println("Password: " + u.getPassword().getClass() + ":" + u.getPassword());
+			System.out.println("- Status.........: " + "In database");
+			System.out.println("- Id.............: " + u.getId());
+			System.out.println("- Email..........: " + u.getEmail());
+			//System.out.println("- Password....: " + u.getPassword());	
+			System.out.println("=== END EJB: FIND USER ===\n");
 			return u;
 		} else {
-			
-			System.out.println("**NO HIT - RETURN NULL**");
+
+			System.out.println("- Status...........: " + "Not Found");
+			System.out.println("=== END EJB: FIND USER ===\n");
 			return null;
 		}
 	}
-	
-		/**
+
+	/**
 	 * Does an insert into the users and user_has_group tables. It creates a
 	 * SHA-256 hash of the password and Base64 encodes it before the u is
 	 * created in the database. The authentication system will read the
@@ -78,27 +81,30 @@ public class UserBean {
 	 */
 	public User createUser(String email, String password) {
 		System.out.println("=== INVOKING EJB: CREATE USER ===");
-		System.out.print("Params: '" + email + "','" + password + "'\n");
+		System.out.println("Query parameters");
+			System.out.println("- Email............: " + email);
+			System.out.println("- Password.........: " + password);
 		User u = findUserByEmail(email);
 
 		if (!(u == null)) {
-			System.out.println("**ERR: USER EXSISTS**");
-			System.out.println("Id: " + u.getId().getClass() + ":" + u.getId());
-			System.out.println("Email: " + u.getEmail().getClass() + ":" + u.getEmail());
-			log.log(Level.INFO, "User already exists {0}",
-				email);
+			System.out.println("- Id...............: " + u.getId());
+			System.out.println("- Status...........: " + "Already Exist");
+			//System.out.println("- Password....: " + u.getPassword());
+			//log.log(Level.INFO, "User already exists {0}", email);
+			System.out.println("=== END EJB: FIND USER ===\n");
 			return null;
 		} else {
-			System.out.println("**OK: CREATING USER**");
 			User newUser = new User();
 			newUser.setEmail(email);
 			newUser.setPassword(hasher.generate(password.toCharArray()));
 			Group usergroup = em.find(Group.class,
-				 Group.USER);
+				Group.USER);
 			newUser.getGroups().add(usergroup);
+			System.out.println("- Status...........: " + "Created OK");
+			System.out.println("- Id...............: " + newUser.getId());
+			System.out.println("=== END EJB: FIND USER ===\n");
 			return em.merge(newUser);
 		}
 	}
-	
-}
 
+}
