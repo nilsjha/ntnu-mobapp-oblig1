@@ -9,7 +9,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
-import no.nilsjarh.ntnu.mobapp4.domain.Person;
+import no.nilsjarh.ntnu.mobapp4.domain.User;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -59,15 +59,15 @@ public class PersonTest {
 
 	@Test
 	public void testValidCreatePerson() {
-		Person donald = new Person();
+		User donald = new User();
 		donald.setEmail("thedonald@whitehouse.gov");
 		donald.setFirstName("Donald");
 		donald.setLastName("Trumpo");
 
 		em.persist(donald);
 
-		Query query = em.createNamedQuery(Person.FIND_ALL_PERSONS);
-		Person ret = (Person) query.getResultList().get(0);
+		Query query = em.createNamedQuery(User.FIND_ALL_USERS);
+		User ret = (User) query.getResultList().get(0);
 		System.out.println("Returned tuple id "
 			+ ret.getId()
 			+ "\nName:"

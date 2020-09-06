@@ -27,8 +27,8 @@ public class ItemTest {
 	private static EntityManagerFactory fab;
 	private EntityManager em;
 	
-	private Person seller;
-	private Person buyer;
+	private User seller;
+	private User buyer;
 	private Item item;
 
 	@BeforeClass
@@ -66,7 +66,7 @@ public class ItemTest {
 	
 	@Test
 	public void createItem() {
-		seller = new Person();
+		seller = new User();
 		seller.setEmail("thedonald@whitehouse.gov");
 		seller.setFirstName("Donald J");
 		seller.setLastName("Trump");
@@ -76,7 +76,7 @@ public class ItemTest {
 		item = new Item();
 		item.setTitle("Russian emails");
 		item.setDescription("Some secretz...");
-		item.setSellerPerson(seller);
+		item.setSellerUser(seller);
 		
 		em.persist(item);
 		
