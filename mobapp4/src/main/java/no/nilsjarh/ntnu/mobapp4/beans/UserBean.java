@@ -51,13 +51,12 @@ public class UserBean {
 		Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
 		query.setParameter("email", email);
 		System.out.println("Query parameters");
-			System.out.println("Email............: " + email);
+			System.out.println("- Email............: " + email);
 		List<User> foundUsers = query.getResultList();
 		if (foundUsers.size() == 1) {
 			User u = foundUsers.get(0);
 			System.out.println("- Status.........: " + "In database");
 			System.out.println("- Id.............: " + u.getId());
-			System.out.println("- Email..........: " + u.getEmail());
 			//System.out.println("- Password....: " + u.getPassword());	
 			System.out.println("=== END EJB: FIND USER ===\n");
 			return u;
