@@ -100,10 +100,11 @@ public class UserBean {
 			Group usergroup = em.find(Group.class,
 				Group.USER);
 			newUser.getGroups().add(usergroup);
+			newUser = em.merge(newUser);
 			System.out.println("- Status...........: " + "Created OK");
 			System.out.println("- Id...............: " + newUser.getId());
 			System.out.println("=== END EJB: FIND USER ===\n");
-			return em.merge(newUser);
+			return newUser;
 		}
 	}
 
