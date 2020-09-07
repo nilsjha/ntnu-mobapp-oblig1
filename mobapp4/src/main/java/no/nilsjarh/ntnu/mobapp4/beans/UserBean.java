@@ -110,6 +110,7 @@ public class UserBean {
 		User u = findUserByEmail(email);
 
 		if (!(u == null)) {
+			System.out.println("=== INVOKING EJB: CREATE USER ===");
 			System.out.println("- Id...............: " + u.getId());
 			System.out.println("- Status...........: " + "Already Exist");
 			//System.out.println("- Password....: " + u.getPassword());
@@ -123,28 +124,34 @@ public class UserBean {
 			Group usergroup = em.find(Group.class,
 				Group.USER);
 			newUser.getGroups().add(usergroup);
-			em.persist(newUser);
+			User created = em.merge(newUser);
+			System.out.println("=== INVOKING EJB: CREATE USER ===");
 			System.out.println("- Status...........: " + "Created OK");
-			System.out.println("- In database as id: " + newUser.getId());
-			System.out.println("- Group(s).........: " + newUser.getGroups().toString());
+			System.out.println("- In database as id: " + created.getId());
+			System.out.println("- Group(s).........: " + created.getGroups().toString());
 			System.out.println();
-			return newUser;
+			return created;
 		}
 	}
 
 	public User addGrRoup(User user, String role, boolean add) {
-	
+
 		System.err.println("%%%%%%%%%%%%%%%%%%% DATABASE LOGIC IS REMOVED, YET IT UPDATES THE DATABASE GROUPS%%%%%%%%%%%%%%%%%%%%%");
 		System.out.println("=== INVOKING EJB: GROUP MGMT ===");
 		System.out.print("Query parameters:");
-		System.out.print("user:" + user);
+		System.out.print("user:" + user.getId());
 		System.out.println(", role:" + role);
 		Group groupToChange = findGroupByName(role);
 		if (groupToChange == null) {
+			System.out.println("=== INVOKING EJB: GROUP MGMT ===");
 			System.out.println("- Status...........: " + "Invalid group");
 			return null;
 		} else {
+
+			user = findUserById(user.getId());
+
 			if (user == null) {
+				System.out.println("=== INVOKING EJB: GROUP MGMT ===");
 				System.out.println("- Status...........: " + "Invalid (null) user");
 				return null;
 			}
@@ -160,6 +167,7 @@ public class UserBean {
 				action = "remove";
 			}
 
+			System.out.println("=== INVOKING EJB: GROUP MGMT ===");
 			System.out.println("- User.............: " + user.getId());
 			System.out.println("- Current groups...: " + currentGroups);
 			System.out.println("- Groups to " + action + ": " + groupToChange.getName());
@@ -168,7 +176,7 @@ public class UserBean {
 			if (user.getGroups().equals(predictedGroups)) {
 				// NO UPDATE NESSECARY
 				System.out.println("- Status...........: " + "NO CHANGE, SKIPPING");
-			} 
+			}
 //			else {
 //				try (Connection c = dataSource.getConnection()) {
 //					PreparedStatement psg;
@@ -217,6 +225,7 @@ public class UserBean {
 			switch (role) {
 				case Group.ADMIN:
 					result = true;
+					break;
 				case Group.USER:
 					result = true;
 					break;

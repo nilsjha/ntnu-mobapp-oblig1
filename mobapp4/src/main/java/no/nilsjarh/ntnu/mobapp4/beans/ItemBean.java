@@ -9,11 +9,13 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Resource;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.sql.DataSource;
+import lombok.extern.java.Log;
 import no.nilsjarh.ntnu.mobapp4.domain.*;
 import no.nilsjarh.ntnu.mobapp4.resources.DatasourceProducer;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -22,6 +24,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  *
  * @author nils
  */
+@Log
+@Stateless
 public class ItemBean {
 
 	@Inject
@@ -41,43 +45,73 @@ public class ItemBean {
 	 */
 	@PersistenceContext
 	EntityManager em;
-
-	public List<Item> getOwnedItems(User seller) {
-		Query query = em.createNamedQuery(Item.FIND_ITEMS_BY_USER);
-		return query.getResultList();
-	}
-
+	
+	
 	public Item addItem(User seller, String title, BigDecimal priceNok) {
 		Item i = new Item(seller, title, priceNok);
 		em.persist(i);
 		return i;
 	}
+
+	public Item getItem(Long id) {
+		return em.find(Item.class, id);
+	}
 	
-	public Item findItem(User u, Long id) {
+	public Item updateItem(Item i) {
+		if (getItem(i.getId()) != null) {
+			return em.merge(i);
+		} else {
+			return null;
+		}
+	}
+	
+	public Item deleteItem(Item i) {
+		if (getItem(i.getId()) != null) {
+			em.remove(i);
+			return null;
+		} else {
+			return i;
+		}
+	}
+
+
+	public Item getItemBySeller(User u, Long id) {
 		Item found = em.find(Item.class, id);
-		if (Objects.equals(found.getSellerUser().getId(), id)) {
+		if (verifyOwnedItem(u, found) != null) {
 			return found;
 		} else {
 			return null;
 		}
 	}
-
-	public String deleteItem(Long id) {
-		Item i = em.find(Item.class, id);
-		String status;
-		try {
-			em.getTransaction().begin();
-			em.remove(i);
-			em.getTransaction().commit();
-			i.setSellerUser(null);
-			status = "Deleted item " + i.getId();
-			
-		} catch (Exception e) {
-			System.err.println("Unable to delete " + i.getId());
-			System.err.print(e);
-			status = "Unable to remove item " + i.getId();
+	private Item verifyOwnedItem(User seller,Item item) {
+		if (item.getSellerUser().equals(seller)) {
+			return item;
+		} else {
+			return null;
 		}
-		return status;
 	}
+
+	public Item deleteOwnedItem(User owner, Item toDelete) {
+		if (verifyOwnedItem(owner, toDelete) != null) {
+			try {
+				em.remove(toDelete);
+				return null;
+
+			} catch (Exception e) {
+				System.err.println("Unable to delete " + toDelete.getId());
+				System.err.print(e);
+				return toDelete;
+			}
+
+		} else {
+			return toDelete;
+		}
+	}
+	
+	public List<Item> getItemListBySeller(User seller) {
+		Query query = em.createNamedQuery(Item.FIND_ITEMS_BY_USER);
+		return query.getResultList();
+	}
+	
 
 }
