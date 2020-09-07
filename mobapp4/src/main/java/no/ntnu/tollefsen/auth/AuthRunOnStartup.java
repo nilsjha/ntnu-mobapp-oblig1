@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import lombok.extern.java.Log;
 import no.nilsjarh.ntnu.mobapp4.beans.UserBean;
 import no.nilsjarh.ntnu.mobapp4.domain.User;
 
@@ -16,6 +17,7 @@ import no.nilsjarh.ntnu.mobapp4.domain.User;
  */
 @Singleton
 @Startup
+@Log
 public class AuthRunOnStartup {
 
 	@PersistenceContext
@@ -39,10 +41,16 @@ public class AuthRunOnStartup {
 				.getSingleResult() + " groups in DB");
 
 		User admin = userBean.createUser("admin@admin.ad", "123456");
-		if (userBean.addGrRoup(admin, "admin", true) == null) {
-			System.out.println("You should have not seen this, as this shall never be NULL on any DB action taken");
+		// TEST DUP USER
+		userBean.addGroup(admin, "user", true);
+		// TEST REMOVE USER
+		userBean.addGroup(admin, "user", false);
+		// TEST ADD USER
+		userBean.addGroup(admin, "user", true);
+		// TEST ADD ADMIN
+		userBean.addGroup(admin, "admin", true);
 
-		}
+		userBean.getUserInfo(admin);
 
 
 

@@ -8,6 +8,7 @@ package no.nilsjarh.ntnu.mobapp4.beans;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import javax.annotation.Resource;
@@ -55,7 +56,7 @@ public class UserBean {
 	public User findUserById(String id) {
 		System.out.println("=== INVOKING EJB: FIND USER ===");
 		System.out.print("Query parameters:");
-		System.out.println("id:" + id);
+		System.out.print("id:" + id);
 		User found = em.find(User.class, id);
 
 		if (found == null) {
@@ -75,7 +76,7 @@ public class UserBean {
 		Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
 		query.setParameter("email", email);
 		System.out.print("Query parameters:");
-		System.out.println("mail:" + email);
+		System.out.print("mail:" + email);
 		List<User> foundUsers = query.getResultList();
 		if (foundUsers.size() == 1) {
 			User u = foundUsers.get(0);
@@ -106,7 +107,7 @@ public class UserBean {
 		System.out.println("=== INVOKING EJB: CREATE USER ===");
 		System.out.print("Query parameters:");
 		System.out.print("mail:" + email);
-		System.out.println(", pass:" + password);
+		System.out.print(", pass:" + password);
 		User u = findUserByEmail(email);
 
 		if (!(u == null)) {
@@ -128,82 +129,79 @@ public class UserBean {
 			System.out.println("=== INVOKING EJB: CREATE USER ===");
 			System.out.println("- Status...........: " + "Created OK");
 			System.out.println("- In database as id: " + created.getId());
-			System.out.println("- Group(s).........: " + created.getGroups().toString());
+			System.out.println("- Group(s).........: " + returnGroupNames(created.getGroups()));
 			System.out.println();
 			return created;
 		}
 	}
 
-	public User addGrRoup(User user, String role, boolean add) {
+	public void getUserInfo(User user) {
+		user = em.find(User.class, user.getId());
+		System.out.println("=== INVOKING EJB: USERINFO ===");
+		System.out.println("- In database as id: " + user.getId());
+		System.out.println("- Group(s).........: " + returnGroupNames(user.getGroups()));
+	}
 
-		System.err.println("%%%%%%%%%%%%%%%%%%% DATABASE LOGIC IS REMOVED, YET IT UPDATES THE DATABASE GROUPS%%%%%%%%%%%%%%%%%%%%%");
-		System.out.println("=== INVOKING EJB: GROUP MGMT ===");
-		System.out.print("Query parameters:");
-		System.out.print("user:" + user.getId());
-		System.out.println(", role:" + role);
+	public User addGroup(User user, String role, boolean add) {
 		Group groupToChange = findGroupByName(role);
 		if (groupToChange == null) {
 			System.out.println("=== INVOKING EJB: GROUP MGMT ===");
 			System.out.println("- Status...........: " + "Invalid group");
 			return null;
 		} else {
-
-			user = findUserById(user.getId());
-
-			if (user == null) {
-				System.out.println("=== INVOKING EJB: GROUP MGMT ===");
-				System.out.println("- Status...........: " + "Invalid (null) user");
-				return null;
-			}
-
 			List<Group> currentGroups = user.getGroups();
-			List<Group> predictedGroups = currentGroups;
+			List<Group> predictedGroups = new ArrayList<Group>(currentGroups);
 			String action = "add";
 			if (add) {
+				if (!(predictedGroups.contains(groupToChange))) {
 				predictedGroups.add(groupToChange);
+				}
 			} else {
-
-				predictedGroups.remove(groupToChange);
 				action = "remove";
+				if (predictedGroups.contains(groupToChange)) {
+				predictedGroups.remove(groupToChange);
+				}
 			}
 
 			System.out.println("=== INVOKING EJB: GROUP MGMT ===");
 			System.out.println("- User.............: " + user.getId());
-			System.out.println("- Current groups...: " + currentGroups);
+			System.out.println("- Current groups...: " + returnGroupNames(currentGroups));
 			System.out.println("- Groups to " + action + ": " + groupToChange.getName());
-			System.out.println("- Predicted update...: " + predictedGroups);
+			System.out.println("- Predicted update...: " + returnGroupNames(predictedGroups));
 
-			if (user.getGroups().equals(predictedGroups)) {
+			if (currentGroups.equals(predictedGroups)) {
 				// NO UPDATE NESSECARY
 				System.out.println("- Status...........: " + "NO CHANGE, SKIPPING");
-			}
-//			else {
-//				try (Connection c = dataSource.getConnection()) {
-//					PreparedStatement psg;
-//					if (add) {
-//						System.out.println("- Action...........: " + "ADD");
-//						psg = c.prepareStatement(INSERT_USERGROUP);
-//					} else {
-//						psg = c.prepareStatement(DELETE_USERGROUP);
-//						System.out.println("- Action...........: " + "REVOKE");
-//					}
-//					psg.setString(1, role);
-//					psg.setString(2, user.getId());
-//					psg.executeUpdate();
-//					System.out.println("- Status...........: " + "COMPLETE");
-//				} catch (SQLException ex) {
-//					log.log(Level.SEVERE, null, ex);
-//					System.out.println("- SQL..............: " + "FAILED\n");
-//					return null;
-//				}
-//				System.out.println("- Updated groups...: " + user.getGroups().toString());
-//				return user;
-//
-//			}
+				return null;
+			} else {
+				List<Group> changedGroups = currentGroups;
+				if (add) {
+					changedGroups.add(groupToChange);
+					System.out.println("- Action...........: " + "ADD");
+				} else {
+					changedGroups.remove(groupToChange);
+					System.out.println("- Action...........: " + "REVOKE");
 
+				}
+			System.out.println("- Completed update...: " + returnGroupNames(changedGroups));
+			em.flush();
+			return user;
+			}
 		}
-		System.err.println("%%%%%%%%%%%%%%%%%%% BROKEN METHOD END %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-		return null;
+	}
+
+	
+
+	private String returnGroupNames(List<Group> list) {
+		if (list.isEmpty()) {
+			return "<none>";
+		}
+		StringBuilder sb = new StringBuilder();
+		for (Group element : list) {
+			sb.append(element.getName());
+			sb.append(" ");
+		}
+		return sb.toString();
 	}
 
 	private Group findGroupByName(String name) {

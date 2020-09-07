@@ -242,7 +242,7 @@ public class AuthenticationService {
 		System.out.println(", role:" + role);
 		User foundUser = userBean.findUserByEmail(email);
 		if (foundUser != null) {
-			if (!(userBean.addGrRoup(foundUser, role, true) == null)) {
+			if (!(userBean.addGroup(foundUser, role, true) == null)) {
 				return Response.ok().build();
 			}
 		}
@@ -265,7 +265,7 @@ public class AuthenticationService {
 		System.out.println(", role:" + role);
 		User foundUser = userBean.findUserByEmail(email);
 		if (foundUser != null) {
-			if (!(userBean.addGrRoup(foundUser, role, false) == null)) {
+			if (!(userBean.addGroup(foundUser, role, false) == null)) {
 				return Response.ok().build();
 			}
 		}
