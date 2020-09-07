@@ -120,9 +120,7 @@ public class AuthenticationService {
 		@FormParam("pwd") @NotBlank String pwd,
 		@Context HttpServletRequest request) {
 		System.out.println("=== INVOKING REST-AUTH: LOGON ===");
-		System.out.print("Query parameters:");
-		System.out.print("email:" + email);
-		System.out.println(", password:" + pwd);
+		System.out.print("Query parameters: email:" + email + ", password:" + pwd);
 
 		User exsistingUser = userBean.findUserByEmail(email);
 
@@ -137,6 +135,7 @@ public class AuthenticationService {
 				String token = issueToken(result.getCallerPrincipal().getName(),
 					result.getCallerGroups(), request);
 
+				System.out.println("=== INVOKING REST-AUTH: LOGON ===");
 				System.out.println("- Logged on with ID...............: " + exsistingUser.getId());
 				System.out.println();
 				return Response
@@ -145,8 +144,8 @@ public class AuthenticationService {
 					.build();
 			}
 		}
+		System.out.println("=== INVOKING REST-AUTH: LOGON ===");
 		System.out.println("- Unable to logon..................: " + email);
-		System.out.println();
 
 		return Response.status(Response.Status.UNAUTHORIZED)
 			.build();
@@ -186,9 +185,7 @@ public class AuthenticationService {
 
 	private Response buildCreatedUserResponse(String email, String pwd) {
 		System.out.println("=== INVOKING REST-AUTH: CREATE USER ===");
-		System.out.print("Query parameters:");
-		System.out.print("email:" + email);
-		System.out.println(", password:" + pwd);
+		System.out.print("Query parameters: email:" + email + ", password:" + pwd);
 		User createdUser = userBean.createUser(email, pwd);
 		if (createdUser == null) {
 
@@ -239,7 +236,7 @@ public class AuthenticationService {
 		System.out.println("=== INVOKING REST-AUTH: ADD GROUP ===");
 		System.out.print("Query parameters:");
 		System.out.print("email:" + email);
-		System.out.println(", role:" + role);
+		System.out.print(", role:" + role);
 		User foundUser = userBean.findUserByEmail(email);
 		if (foundUser != null) {
 			if (!(userBean.addGroup(foundUser, role, true) == null)) {
@@ -260,9 +257,7 @@ public class AuthenticationService {
 	@RolesAllowed(value = {Group.ADMIN})
 	public Response removeRole(@QueryParam("email") String email, @QueryParam("role") String role) {
 		System.out.println("=== INVOKING REST-AUTH: REMOVE GROUP ===");
-		System.out.print("Query parameters:");
-		System.out.print("email:" + email);
-		System.out.println(", role:" + role);
+		System.out.print("Query parameters:" + "email:" + email + ", role:" + role);
 		User foundUser = userBean.findUserByEmail(email);
 		if (foundUser != null) {
 			if (!(userBean.addGroup(foundUser, role, false) == null)) {
@@ -287,9 +282,7 @@ public class AuthenticationService {
 		@QueryParam("pwd") String password,
 		@Context SecurityContext sc) {
 		System.out.println("=== INVOKING REST-AUTH: CHANGE PASSWORD ===");
-		System.out.print("Query parameters:");
-		System.out.print("email:" + emailAccess);
-		System.out.println(", role:" + password);
+		System.out.print("Query parameters: email:" + emailAccess + ", role:" + password);
 
 		User accessUser = userBean.findUserByEmail(emailAccess);
 		if (accessUser == null) {
@@ -299,6 +292,7 @@ public class AuthenticationService {
 		}
 
 		String id = accessUser.getId();
+		System.out.println("=== INVOKING REST-AUTH: CHANGE PASSWORD ===");
 		System.out.println("- Access User.......................: " + id);
 
 		String authuser = sc.getUserPrincipal() != null ? sc.getUserPrincipal().getName() : null;

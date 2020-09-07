@@ -55,8 +55,7 @@ public class UserBean {
 
 	public User findUserById(String id) {
 		System.out.println("=== INVOKING EJB: FIND USER ===");
-		System.out.print("Query parameters:");
-		System.out.print("id:" + id);
+		System.out.print("Query parameters: id:" + id);
 		User found = em.find(User.class, id);
 
 		if (found == null) {
@@ -75,8 +74,7 @@ public class UserBean {
 		System.out.println("=== INVOKING EJB: FIND USER ===");
 		Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
 		query.setParameter("email", email);
-		System.out.print("Query parameters:");
-		System.out.print("mail:" + email);
+		System.out.print("Query parameters: mail:" + email);
 		List<User> foundUsers = query.getResultList();
 		if (foundUsers.size() == 1) {
 			User u = foundUsers.get(0);
@@ -105,9 +103,8 @@ public class UserBean {
 	 */
 	public User createUser(String email, String password) {
 		System.out.println("=== INVOKING EJB: CREATE USER ===");
-		System.out.print("Query parameters:");
-		System.out.print("mail:" + email);
-		System.out.print(", pass:" + password);
+		System.out.print("Query parameters: mail:" + email
+			+ ", pass:" + password);
 		User u = findUserByEmail(email);
 
 		if (!(u == null)) {
@@ -172,7 +169,7 @@ public class UserBean {
 			if (currentGroups.equals(predictedGroups)) {
 				// NO UPDATE NESSECARY
 				System.out.println("- Status...........: " + "NO CHANGE, SKIPPING");
-				return null;
+				return user;
 			} else {
 				List<Group> changedGroups = currentGroups;
 				if (add) {
