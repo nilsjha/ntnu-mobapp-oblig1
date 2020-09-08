@@ -25,9 +25,11 @@ import javax.persistence.Temporal;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
@@ -39,12 +41,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @NamedQueries({
 	@NamedQuery(name = Item.FIND_ALL_ITEMS, query = "SELECT i FROM items i"),
+	@NamedQuery(name = Item.FIND_ALL_ITEMS_UNSOLD,
+		query = "SELECT i FROM items i WHERE i.purchase.id IS NULL"),
 	@NamedQuery(name = Item.FIND_ITEMS_BY_USER,
-		query = "SELECT i FROM items i WHERE i.sellerUser LIKE :seller")
+		query = "SELECT i FROM items i WHERE i.sellerUser.id LIKE :seller")
 })
 public class Item implements Serializable {
 
 	public final static String FIND_ALL_ITEMS = "findAllItems";
+	public final static String FIND_ALL_ITEMS_UNSOLD = "findUnsoldItems";
 	public final static String FIND_ITEMS_BY_USER = "findItemsByUser";
 
 	@Id
@@ -56,7 +61,7 @@ public class Item implements Serializable {
 	@Column(name = "title")
 	private String title;
 
-	@NotEmpty
+	@NotNull
 	@Positive
 	@Column(name = "price_nok")
 	private BigDecimal priceNok;
@@ -85,7 +90,7 @@ public class Item implements Serializable {
 	/**
 	 * OWNER SIDE *
 	 */
-	@NotEmpty
+	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
 	@JoinColumn(name = "seller_user_id", referencedColumnName = "id",
 		nullable = false)

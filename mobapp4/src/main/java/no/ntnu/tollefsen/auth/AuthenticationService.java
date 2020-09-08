@@ -73,9 +73,6 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 @Log
 public class AuthenticationService {
 
-	private static final String INSERT_USERGROUP = "INSERT INTO user_has_group(name,id) VALUES (?,?)";
-	private static final String DELETE_USERGROUP = "DELETE FROM user_has_group WHERE name LIKE ? AND id LIKE ?";
-
 	@Inject
 	KeyService keyService;
 
@@ -116,16 +113,14 @@ public class AuthenticationService {
 	 * @param request
 	 * @return
 	 */
-	@GET
+	@POST
 	@Path("login")
 	public Response login(
-		@QueryParam("email") @NotBlank String email,
-		@QueryParam("pwd") @NotBlank String pwd,
+		@FormParam("email") @NotBlank String email,
+		@FormParam("pwd") @NotBlank String pwd,
 		@Context HttpServletRequest request) {
 		System.out.println("=== INVOKING REST-AUTH: LOGON ===");
-		System.out.println("Query parameters");
-		System.out.println("- Email.............................: " + email);
-		System.out.println("- Password..........................: " + pwd);
+		System.out.print("Query parameters: email:" + email + ", password:" + pwd);
 
 		User exsistingUser = userBean.findUserByEmail(email);
 
@@ -139,17 +134,18 @@ public class AuthenticationService {
 			if (result.getStatus() == CredentialValidationResult.Status.VALID) {
 				String token = issueToken(result.getCallerPrincipal().getName(),
 					result.getCallerGroups(), request);
-				
-		System.out.println("- Logged on with ID...............: " + exsistingUser.getId());
-		System.out.println("=== END REST-AUTH: LOGON ===\n");
+
+				System.out.println("=== INVOKING REST-AUTH: LOGON ===");
+				System.out.println("- Logged on with ID...............: " + exsistingUser.getId());
+				System.out.println();
 				return Response
 					.ok(token)
 					.header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
 					.build();
 			}
 		}
+		System.out.println("=== INVOKING REST-AUTH: LOGON ===");
 		System.out.println("- Unable to logon..................: " + email);
-		System.out.println("=== END REST-AUTH: LOGON ===\n");
 
 		return Response.status(Response.Status.UNAUTHORIZED)
 			.build();
@@ -188,6 +184,8 @@ public class AuthenticationService {
 	}
 
 	private Response buildCreatedUserResponse(String email, String pwd) {
+		System.out.println("=== INVOKING REST-AUTH: CREATE USER ===");
+		System.out.print("Query parameters: email:" + email + ", password:" + pwd);
 		User createdUser = userBean.createUser(email, pwd);
 		if (createdUser == null) {
 
@@ -235,41 +233,17 @@ public class AuthenticationService {
 	@Path("addrole")
 	@RolesAllowed(value = {Group.ADMIN})
 	public Response addRole(@QueryParam("email") String email, @QueryParam("role") String role) {
-		if (!roleExists(role)) {
-			return Response.status(Response.Status.FORBIDDEN).build();
-		}
-
-		try (Connection c = dataSource.getConnection();
-			PreparedStatement psg = c.prepareStatement(INSERT_USERGROUP)) {
-			psg.setString(1, role);
-			psg.setString(2, getCurrentUser().getId());
-			psg.executeUpdate();
-		} catch (SQLException ex) {
-			log.log(Level.SEVERE, null, ex);
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-
-		return Response.ok().build();
-	}
-
-	/**
-	 *
-	 * @param role
-	 * @return
-	 */
-	private boolean roleExists(String role) {
-		boolean result = false;
-
-		if (role != null) {
-			switch (role) {
-				case Group.ADMIN:
-				case Group.USER:
-					result = true;
-					break;
+		System.out.println("=== INVOKING REST-AUTH: ADD GROUP ===");
+		System.out.print("Query parameters:");
+		System.out.print("email:" + email);
+		System.out.print(", role:" + role);
+		User foundUser = userBean.findUserByEmail(email);
+		if (foundUser != null) {
+			if (!(userBean.addGroup(foundUser, role, true) == null)) {
+				return Response.ok().build();
 			}
 		}
-
-		return result;
+		return Response.status(Response.Status.BAD_REQUEST).build();
 	}
 
 	/**
@@ -282,21 +256,15 @@ public class AuthenticationService {
 	@Path("removerole")
 	@RolesAllowed(value = {Group.ADMIN})
 	public Response removeRole(@QueryParam("email") String email, @QueryParam("role") String role) {
-		if (!roleExists(role)) {
-			return Response.status(Response.Status.FORBIDDEN).build();
+		System.out.println("=== INVOKING REST-AUTH: REMOVE GROUP ===");
+		System.out.print("Query parameters:" + "email:" + email + ", role:" + role);
+		User foundUser = userBean.findUserByEmail(email);
+		if (foundUser != null) {
+			if (!(userBean.addGroup(foundUser, role, false) == null)) {
+				return Response.ok().build();
+			}
 		}
-
-		try (Connection c = dataSource.getConnection();
-			PreparedStatement psg = c.prepareStatement(DELETE_USERGROUP)) {
-			psg.setString(1, role);
-			psg.setString(2, email);
-			psg.executeUpdate();
-		} catch (SQLException ex) {
-			log.log(Level.SEVERE, null, ex);
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-
-		return Response.ok().build();
+		return Response.status(Response.Status.BAD_REQUEST).build();
 	}
 
 	/**
@@ -314,18 +282,17 @@ public class AuthenticationService {
 		@QueryParam("pwd") String password,
 		@Context SecurityContext sc) {
 		System.out.println("=== INVOKING REST-AUTH: CHANGE PASSWORD ===");
-		System.out.println("Query parameters");
-		System.out.println("- Email.............................: " + emailAccess);
-		System.out.println("- Password..........................: " + password);
+		System.out.print("Query parameters: email:" + emailAccess + ", role:" + password);
 
 		User accessUser = userBean.findUserByEmail(emailAccess);
 		if (accessUser == null) {
 			System.out.println("- Access User.......................: " + "<No User>");
-			System.out.println("=== END REST-AUTH: CHANGE PASSWORD ===\n");
+			System.out.println();
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		}
 
 		String id = accessUser.getId();
+		System.out.println("=== INVOKING REST-AUTH: CHANGE PASSWORD ===");
 		System.out.println("- Access User.......................: " + id);
 
 		String authuser = sc.getUserPrincipal() != null ? sc.getUserPrincipal().getName() : null;
@@ -333,7 +300,7 @@ public class AuthenticationService {
 		if ((password == null || password.length() < 3)) {
 			log.log(Level.SEVERE, " #1 Failed to change password on u {0}", id);
 			System.out.println("- Password unsatisfied..............: " + password);
-			System.out.println("=== END REST-AUTH: CHANGE PASSWORD ===\n");
+			System.out.println();
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		}
 
@@ -342,13 +309,13 @@ public class AuthenticationService {
 				"#2 No admin access for {0}. Failed to change password on u {1}",
 				new Object[]{authuser, id});
 			System.out.println("- GroupMembership unsatisfied.......: " + accessUser.getGroups().toString());
-			System.out.println("=== END REST-AUTH: CHANGE PASSWORD ===\n");
+			System.out.println();
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		} else {
 			accessUser.setPassword(hasher.generate(password.toCharArray()));
 			em.merge(accessUser);
 			System.out.println("- Password updated..................: " + password);
-			System.out.println("=== END REST-AUTH: CHANGE PASSWORD ===\n");
+			System.out.println();
 			return Response.ok().build();
 		}
 	}

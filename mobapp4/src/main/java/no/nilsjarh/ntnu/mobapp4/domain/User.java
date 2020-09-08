@@ -33,6 +33,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import no.ntnu.tollefsen.auth.Group;
@@ -45,6 +46,7 @@ import no.ntnu.tollefsen.auth.Group;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false, exclude={"ownedItems","donePurchases"})
 @NamedQueries({
 	@NamedQuery(name = User.FIND_ALL_USERS,
 		query = "SELECT p FROM users p ORDER BY p.firstName"),

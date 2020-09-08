@@ -18,11 +18,11 @@ public class JAXRSConfiguration extends ResourceConfig {
 	     * Somehow this hides the error msgs when enabled! 
 	     */
 	    
-	    /**packages(true,"no.nilsjarh.ntnu.mobapp4.auth")
+	    packages(true,"no.nilsjarh.ntnu.mobapp4.resources","no.ntnu.tollefsen.auth")
             .property(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, true)
             // @ValidateOnExecution annotations on subclasses won't cause errors.
             .property(ServerProperties.BV_DISABLE_VALIDATE_ON_EXECUTABLE_OVERRIDE_CHECK, true)
             .register(MultiPartFeature.class);
-	    */
+	    
     }
 }
