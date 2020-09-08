@@ -187,7 +187,7 @@ public class MarketplaceService {
 	public Response updateItem(
 		@QueryParam("id") Long id,
 		@FormParam("title") String title,
-		@FormParam("descrption") String descr,
+		@FormParam("description") String descr,
 		@FormParam("price") BigDecimal pNok) {
 		System.out.println("=== INVOKING REST-MARKET: UPDATE ITEM ===");
 		System.out.print("Query parameters: id:" + id);
