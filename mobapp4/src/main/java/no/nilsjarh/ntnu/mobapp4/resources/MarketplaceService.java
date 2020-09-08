@@ -109,16 +109,39 @@ public class MarketplaceService {
 	@GET
 	@Path("listowned")
 	@RolesAllowed(value = {Group.USER})
-	public Response listOwnItems() {
+	public Response listOwnItems(
+		@QueryParam("as-seller") boolean soldItems,
+		@QueryParam("as-buyer") boolean purchasedItems) {
 		System.out.println("=== INVOKING REST-MARKET: LIST OWN ITEMS ===");
-		User u = em.find(User.class,
-			principal.getName());
+		
+		Response r = Response.status(Response.Status.BAD_REQUEST).build();
+		User u = em.find(User.class, principal.getName());
+		
 		if (u != null) {
-			System.out.print("Query parameters: user:" + u.getId());
-			return Response.ok(ib.getItemListBySellerQuery(u)).build();
-		} else {
-			return Response.status(Response.Status.BAD_REQUEST).build();
+			System.out.print("Query parameters: user:" + u.getId()
+				+ "sold:" + soldItems + ", purchased:" + purchasedItems);
+			
+			if (!(purchasedItems) && (soldItems)) {
+				// ONLY SOLD ITEMS RETURNED
+				r = Response.ok(ib.getItemListBySellerQuery(u)).build();
+			} else if (!(soldItems) && (purchasedItems)) {
+				// ONLY PURCHASED ITEMS RETURNED
+				r = Response.ok(pb.getPurchaseListByBuyerQuery(u)).build();
+			} else if ((soldItems) && (purchasedItems)) {
+				// BOTH SOLD AND PURCHASED ITEMS RETURNED
+				
+				// FIXME: IMPLEMENT CHAINING OF MULTIPLE JSON/
+				//        RESPONSES
+				
+				
+				r = Response.status(Response.Status.NOT_IMPLEMENTED).build();
+			} else {
+				// NONE
+				r = Response.ok().build();
+				
+			}
 		}
+		return r;
 	}
 
 	@POST
@@ -177,7 +200,7 @@ public class MarketplaceService {
 	@RolesAllowed(value = {Group.USER})
 	public Response editItem() {
 		// TO IMPL A DIFF/MERGING EDIT METHOD IN THE FUTURE
-		return Response.status(Response.Status.BAD_REQUEST).build();
+		return Response.status(Response.Status.NOT_IMPLEMENTED).build();
 	}
 
 	@POST
@@ -228,6 +251,7 @@ public class MarketplaceService {
 
 			}
 			System.out.print("State..........:" + "NO ACCESS");
+			return Response.status(Response.Status.UNAUTHORIZED).build();
 		}
 
 		System.out.print("State..........:" + "NO ITEM");
