@@ -141,12 +141,21 @@ public class MarketplaceService {
 		return Response.ok(itemToView).build();
 
 	}
+	
+	@GET
+	@Path("purchase")
+	@RolesAllowed(value = {Group.USER})
+	public Response purchaseItem() {
+		
+		return Response.status(Response.Status.BAD_REQUEST).build();
+	}
+	
 
 	@PATCH
 	@Path("edit")
 	@RolesAllowed(value = {Group.USER})
 	public Response editItem() {
-
+		// TO IMPL A DIFF/MERGING EDIT METHOD IN THE FUTURE
 		return Response.status(Response.Status.BAD_REQUEST).build();
 	}
 
