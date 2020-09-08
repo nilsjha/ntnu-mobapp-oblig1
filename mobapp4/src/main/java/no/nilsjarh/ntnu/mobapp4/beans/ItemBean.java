@@ -55,16 +55,28 @@ public class ItemBean {
 		System.out.println("=== INVOKING EJB: CREATE ITEM ===");
 		System.out.print("Query parameters: title:" + title);
 		Item i = new Item(seller, title, priceNok);
-		em.persist(i);
-		return i;
+		Item o = em.merge(i);
+		em.flush();
+		System.out.println("- Status...........: " + "Created OK");
+		System.out.println("- In database as id: " + o.getId());
+		System.out.println("- Title............: " + o.getTitle());
+		System.out.println("- Seller...........: "
+			+ seller.getFirstName() + " "
+			+ seller.getLastName() + "("
+			+ seller.getId() + ")");
+		return o;
 	}
-	
-	
+
 	public Item getItem(Long id) {
 		System.out.println("=== INVOKING EJB: GET ITEM ===");
 		System.out.print("Query parameters: id:" + id);
-		if (id == null) return null;
-		return em.find(Item.class, id);
+		if (id == null) {
+			return null;
+		}
+		Item found = em.find(Item.class, id);
+		System.out.println("- Status.........: " + "In database");
+		System.out.println("- Id.............: " + found.getId());
+		return found;
 	}
 
 	public Item prepareItemForEdit(Item i) {
@@ -106,7 +118,6 @@ public class ItemBean {
 		return false;
 	}
 
-
 	public Item deleteItem(Item i) {
 		if (em.find(Item.class, (i.getId())) != null) {
 			em.remove(i);
@@ -117,32 +128,37 @@ public class ItemBean {
 	}
 
 	public List<Item> getItemListBySellerQuery(User seller) {
-		em.flush();
+		//em.flush();
 		System.out.println("=== INVOKING EJB: FIND ITEM BY USER QUERY ===");
 		Query query = em.createNamedQuery(Item.FIND_ITEMS_BY_USER);
-		query.setParameter("seller",seller.getId());
-		
+		query.setParameter("seller", seller.getId());
+
 		List<Item> foundItems = new ArrayList<Item>(query.getResultList());
-		
+
 		System.out.println("- Seller.............: " + seller.getId());
 		System.out.println("- Found items........: " + returnItemNames(foundItems));
 		return foundItems;
 	}
-	
 
 	public List<Item> getPublishedItems() {
-		/// INSERT LOGIC // 
-		return new ArrayList<>();
+		System.out.println("=== INVOKING EJB: FIND ALL ITEMS QUERY ===");
+		Query query = em.createNamedQuery(Item.FIND_ALL_ITEMS);
+
+		List<Item> allItems = new ArrayList<Item>(query.getResultList());
+
+		return allItems;
 	}
-	
-		private String returnItemNames(List<Item> list) {
+
+	private String returnItemNames(List<Item> list) {
 		if (list.isEmpty()) {
 			return "<none>";
 		}
 		StringBuilder sb = new StringBuilder();
 		for (Item element : list) {
-			sb.append(element.getTitle());
-			sb.append(" ");
+			sb.append("[");
+			sb.append(element.getId());
+			sb.append(":" + element.getTitle());
+			sb.append("], ");
 		}
 		return sb.toString();
 	}

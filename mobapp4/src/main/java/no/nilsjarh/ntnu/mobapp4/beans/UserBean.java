@@ -144,9 +144,9 @@ public class UserBean {
 
 	public User addGroup(User user, String role, boolean add) {
 		Group groupToChange = findGroupByName(role);
-		if (groupToChange == null) {
+		if (groupToChange == null || user == null) {
 			System.out.println("=== INVOKING EJB: GROUP MGMT ===");
-			System.out.println("- Status...........: " + "Invalid group");
+			System.out.println("- Status...........: " + "Parameters invalid");
 			return null;
 		} else {
 			List<Group> currentGroups = user.getGroups();
@@ -177,10 +177,10 @@ public class UserBean {
 				List<Group> changedGroups = currentGroups;
 				if (add) {
 					changedGroups.add(groupToChange);
-					System.out.println("- Action...........: " + "ADD");
+					System.out.println("- Action.............: " + "ADD");
 				} else {
 					changedGroups.remove(groupToChange);
-					System.out.println("- Action...........: " + "REVOKE");
+					System.out.println("- Action.............: " + "REVOKE");
 
 				}
 			System.out.println("- Completed update...: " + returnGroupNames(changedGroups));
