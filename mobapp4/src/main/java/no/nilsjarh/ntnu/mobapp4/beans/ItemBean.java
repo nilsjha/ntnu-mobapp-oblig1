@@ -6,15 +6,20 @@
 package no.nilsjarh.ntnu.mobapp4.beans;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.sql.DataSource;
+import javax.ws.rs.core.Response;
 import lombok.extern.java.Log;
 import no.nilsjarh.ntnu.mobapp4.domain.*;
 import no.nilsjarh.ntnu.mobapp4.resources.DatasourceProducer;
@@ -45,28 +50,58 @@ public class ItemBean {
 	 */
 	@PersistenceContext
 	EntityManager em;
-	
-	
+
 	public Item addItem(User seller, String title, BigDecimal priceNok) {
 		Item i = new Item(seller, title, priceNok);
 		em.persist(i);
 		return i;
 	}
-
+	
+	
 	public Item getItem(Long id) {
 		return em.find(Item.class, id);
 	}
-	
-	public Item updateItem(Item i) {
-		if (getItem(i.getId()) != null) {
-			return em.merge(i);
-		} else {
+
+	public Item prepareItemForEdit(Item i) {
+		if (i != null) {
+			try {
+				em.lock(i, LockModeType.PESSIMISTIC_WRITE);
+				return i;
+			} catch (Exception e) {
+				log.log(Level.SEVERE, "Load of item failed with e:{0}", e);
+			}
+		}
+		return null;
+	}
+
+	public Item saveItemFromEdit(Item toSave) {
+		if (toSave == null) {
 			return null;
+		} else {
+			try {
+				em.merge(toSave);
+				em.lock(toSave, LockModeType.NONE);
+				em.flush();
+				return toSave;
+			} catch (Exception e) {
+				log.log(Level.SEVERE, "Save of item failed with e:{0}", e);
+				return null;
+			}
 		}
 	}
-	
+
+	public boolean verifyOwnedItem(Item i, User owner) {
+		if (i != null) {
+			if (i.getSellerUser().equals(owner)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
 	public Item deleteItem(Item i) {
-		if (getItem(i.getId()) != null) {
+		if (em.find(Item.class, (i.getId())) != null) {
 			em.remove(i);
 			return null;
 		} else {
@@ -74,44 +109,22 @@ public class ItemBean {
 		}
 	}
 
-
-	public Item getItemBySeller(User u, Long id) {
-		Item found = em.find(Item.class, id);
-		if (verifyOwnedItem(u, found) != null) {
-			return found;
-		} else {
-			return null;
-		}
-	}
-	private Item verifyOwnedItem(User seller,Item item) {
-		if (item.getSellerUser().equals(seller)) {
-			return item;
-		} else {
-			return null;
-		}
-	}
-
-	public Item deleteOwnedItem(User owner, Item toDelete) {
-		if (verifyOwnedItem(owner, toDelete) != null) {
-			try {
-				em.remove(toDelete);
-				return null;
-
-			} catch (Exception e) {
-				System.err.println("Unable to delete " + toDelete.getId());
-				System.err.print(e);
-				return toDelete;
-			}
-
-		} else {
-			return toDelete;
-		}
-	}
-	
-	public List<Item> getItemListBySeller(User seller) {
+	public List<Item> getItemListBySellerQuery(User seller) {
 		Query query = em.createNamedQuery(Item.FIND_ITEMS_BY_USER);
 		return query.getResultList();
 	}
 	
+	public List<Item> getItemListBySeller(User seller) {
+		if (seller.getOwnedItems().isEmpty()) {
+			return null;
+		} else {
+			return new ArrayList<Item>(seller.getOwnedItems());
+		}
+	}
+	
+	public List<Item> getPublishedItems() {
+		/// INSERT LOGIC // 
+		return new ArrayList<>();
+	}
 
 }

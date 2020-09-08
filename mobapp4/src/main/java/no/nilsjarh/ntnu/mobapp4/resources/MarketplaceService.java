@@ -1,0 +1,132 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package no.nilsjarh.ntnu.mobapp4.resources;
+
+import java.math.BigDecimal;
+import javax.annotation.Resource;
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.security.enterprise.identitystore.IdentityStoreHandler;
+import javax.security.enterprise.identitystore.PasswordHash;
+import javax.sql.DataSource;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.PATCH;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import lombok.extern.java.Log;
+import no.nilsjarh.ntnu.mobapp4.beans.*;
+import no.nilsjarh.ntnu.mobapp4.domain.Item;
+import no.nilsjarh.ntnu.mobapp4.domain.User;
+import no.ntnu.tollefsen.auth.Group;
+import no.ntnu.tollefsen.auth.KeyService;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.jwt.JsonWebToken;
+
+/**
+ *
+ * @author nils
+ */
+@Path("marketplace")
+@Stateless
+@Log
+public class MarketplaceService {
+
+	@Inject
+	KeyService keyService;
+
+	@Inject
+	IdentityStoreHandler identityStoreHandler;
+
+	@Inject
+	@ConfigProperty(name = "mp.jwt.verify.issuer", defaultValue = "issuer")
+	String issuer;
+
+	/**
+	 * The application server will inject a DataSource as a way to
+	 * communicate with the database.
+	 */
+	@Resource(lookup = DatasourceProducer.JNDI_NAME)
+	DataSource dataSource;
+
+	/**
+	 * The application server will inject a EntityManager as a way to
+	 * communicate with the database via JPA.
+	 */
+	@PersistenceContext
+	EntityManager em;
+
+	@Inject
+	PasswordHash hasher;
+
+	@Inject
+	JsonWebToken principal;
+
+	@Inject
+	UserBean ub;
+
+	@Inject
+	ItemBean ib;
+
+	@GET
+	@Path("list")
+	@RolesAllowed(value = {Group.USER})
+	public Response listItems() {
+
+	return Response.status(Response.Status.BAD_REQUEST).build();
+	}
+
+	@POST
+	@Path("add")
+	@RolesAllowed(value = {Group.USER})
+	public Response addItem(@FormParam("title") String title, @FormParam("price") BigDecimal price) {
+		Item createdItem = ib.addItem(em.find(User.class,
+			principal.getName()), title, price);
+		if (createdItem != null) {
+			return Response.ok(createdItem).build();
+			
+		}
+
+	return Response.status(Response.Status.BAD_REQUEST).build();
+	}
+
+	@GET
+	@Path("view")
+	@RolesAllowed(value = {Group.USER})
+	public Response viewItem() {
+
+	return Response.status(Response.Status.BAD_REQUEST).build();
+	}
+
+	@PATCH
+	@Path("edit")
+	@RolesAllowed(value = {Group.USER})
+	public Response editItem() {
+
+	return Response.status(Response.Status.BAD_REQUEST).build();
+	}
+
+	@DELETE
+	@Path("edit")
+	@RolesAllowed(value = {Group.USER})
+	public Response deleteItem() {
+
+	return Response.status(Response.Status.BAD_REQUEST).build();
+	}
+
+
+}

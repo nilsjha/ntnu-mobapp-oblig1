@@ -186,7 +186,6 @@ public class UserBean {
 			}
 		}
 	}
-
 	
 
 	private String returnGroupNames(List<Group> list) {

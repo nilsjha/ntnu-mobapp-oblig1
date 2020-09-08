@@ -25,6 +25,7 @@ import javax.persistence.Temporal;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -56,7 +57,7 @@ public class Item implements Serializable {
 	@Column(name = "title")
 	private String title;
 
-	@NotEmpty
+	@NotNull
 	@Positive
 	@Column(name = "price_nok")
 	private BigDecimal priceNok;
@@ -85,7 +86,7 @@ public class Item implements Serializable {
 	/**
 	 * OWNER SIDE *
 	 */
-	@NotEmpty
+	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
 	@JoinColumn(name = "seller_user_id", referencedColumnName = "id",
 		nullable = false)
