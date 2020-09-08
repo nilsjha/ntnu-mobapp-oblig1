@@ -64,6 +64,7 @@ public class ItemBean {
 			+ seller.getFirstName() + " "
 			+ seller.getLastName() + "("
 			+ seller.getId() + ")");
+
 		return o;
 	}
 
@@ -74,6 +75,10 @@ public class ItemBean {
 			return null;
 		}
 		Item found = em.find(Item.class, id);
+		if (found == null) {
+			return null;
+		}
+		em.refresh(found);
 		System.out.println("- Status.........: " + "In database");
 		System.out.println("- Id.............: " + found.getId());
 		return found;
@@ -118,17 +123,29 @@ public class ItemBean {
 		return false;
 	}
 
-	public Item deleteItem(Item i) {
-		if (em.find(Item.class, (i.getId())) != null) {
+	public boolean deleteItem(Item i) {
+		System.out.println("=== INVOKING EJB: DELETE ITEM ===");
+		if (i != null) {
+			Long id = i.getId();
+			if (id == null) {
+				return false;
+			}
+			System.out.println("- Found item id..: " + id);
 			em.remove(i);
-			return null;
-		} else {
-			return i;
+			em.flush();
+			if (getItem(id) == null) {
+				System.out.println("- Status.........: " + "DELETED");
+				return true;
+			}
 		}
+		System.out.print("State..........:" + "ERROR ON DELETE");
+		return false;
 	}
 
 	public List<Item> getItemListBySellerQuery(User seller) {
-		//em.flush();
+		if (seller == null) {
+			return new ArrayList<>();
+		}
 		System.out.println("=== INVOKING EJB: FIND ITEM BY USER QUERY ===");
 		Query query = em.createNamedQuery(Item.FIND_ITEMS_BY_USER);
 		query.setParameter("seller", seller.getId());
@@ -145,6 +162,7 @@ public class ItemBean {
 		Query query = em.createNamedQuery(Item.FIND_ALL_ITEMS);
 
 		List<Item> allItems = new ArrayList<Item>(query.getResultList());
+		System.out.println("- Found items........: " + returnItemNames(allItems));
 
 		return allItems;
 	}

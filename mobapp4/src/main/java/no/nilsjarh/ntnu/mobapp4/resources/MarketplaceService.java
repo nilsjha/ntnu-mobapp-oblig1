@@ -86,8 +86,10 @@ public class MarketplaceService {
 	@Path("list")
 	@RolesAllowed(value = {Group.USER})
 	public Response listItems() {
+		System.out.println("=== INVOKING REST-MARKET: LIST ALL ITEMS ===");
+		
+		return Response.ok(ib.getPublishedItems()).build();
 
-		return Response.status(Response.Status.BAD_REQUEST).build();
 	}
 
 	@GET
@@ -150,8 +152,26 @@ public class MarketplaceService {
 	@DELETE
 	@Path("remove")
 	@RolesAllowed(value = {Group.USER})
-	public Response deleteItem() {
-
+	public Response deleteItem(@QueryParam("id") Long id) {
+		System.out.println("=== INVOKING REST-MARKET: DELETE ITEM ===");
+		System.out.print("Query parameters: id:" + id);
+		Item itemToDelete = ib.getItem(id);
+		if (itemToDelete != null) {
+			System.out.print("Found item.....:" + itemToDelete.getId());
+		if (ib.verifyOwnedItem(itemToDelete, em.find(User.class,
+			principal.getName()))) {
+			
+			if (ib.deleteItem(itemToDelete)) {
+				return Response.ok("").build();
+			} else {
+				
+			}
+			
+		}
+		System.out.print("State..........:" + "NO ACCESS");
+		}
+		
+		System.out.print("State..........:" + "NO ITEM");
 		return Response.status(Response.Status.BAD_REQUEST).build();
 	}
 

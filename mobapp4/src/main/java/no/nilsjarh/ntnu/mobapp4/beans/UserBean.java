@@ -56,7 +56,9 @@ public class UserBean {
 	public User findUserById(String id) {
 		System.out.println("=== INVOKING EJB: FIND USER ===");
 		System.out.print("Query parameters: id:" + id);
-		if (id == null) return null;
+		if (id == null) {
+			return null;
+		}
 		User found = em.find(User.class, id);
 
 		if (found == null) {
@@ -74,7 +76,9 @@ public class UserBean {
 	public User findUserByEmail(String email) {
 		System.out.println("=== INVOKING EJB: FIND USER ===");
 		Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
-		if (email == null) return null;
+		if (email == null) {
+			return null;
+		}
 		query.setParameter("email", email);
 		System.out.print("Query parameters: mail:" + email);
 		List<User> foundUsers = query.getResultList();
@@ -107,10 +111,10 @@ public class UserBean {
 		System.out.println("=== INVOKING EJB: CREATE USER ===");
 		System.out.print("Query parameters: mail:" + email
 			+ ", pass:" + password);
-		if (email == null) return null;
+		if (email == null || password == null) return null;
 		User u = findUserByEmail(email);
 
-		if (!(u == null)) {
+		if (u != null) {
 			System.out.println("=== INVOKING EJB: CREATE USER ===");
 			System.out.println("- Id...............: " + u.getId());
 			System.out.println("- Status...........: " + "Already Exist");
@@ -136,10 +140,13 @@ public class UserBean {
 	}
 
 	public void getUserInfo(User user) {
-		user = em.find(User.class, user.getId());
-		System.out.println("=== INVOKING EJB: USERINFO ===");
-		System.out.println("- In database as id: " + user.getId());
-		System.out.println("- Group(s).........: " + returnGroupNames(user.getGroups()));
+		if (user != null) {
+			user = em.find(User.class, user.getId());
+			System.out.println("=== INVOKING EJB: USERINFO ===");
+			System.out.println("- In database as id: " + user.getId());
+			System.out.println("- Group(s).........: " + returnGroupNames(user.getGroups()));
+		}
+
 	}
 
 	public User addGroup(User user, String role, boolean add) {
@@ -154,12 +161,12 @@ public class UserBean {
 			String action = "add";
 			if (add) {
 				if (!(predictedGroups.contains(groupToChange))) {
-				predictedGroups.add(groupToChange);
+					predictedGroups.add(groupToChange);
 				}
 			} else {
 				action = "remove";
 				if (predictedGroups.contains(groupToChange)) {
-				predictedGroups.remove(groupToChange);
+					predictedGroups.remove(groupToChange);
 				}
 			}
 
@@ -183,13 +190,12 @@ public class UserBean {
 					System.out.println("- Action.............: " + "REVOKE");
 
 				}
-			System.out.println("- Completed update...: " + returnGroupNames(changedGroups));
-			em.flush();
-			return user;
+				System.out.println("- Completed update...: " + returnGroupNames(changedGroups));
+				em.flush();
+				return user;
 			}
 		}
 	}
-	
 
 	private String returnGroupNames(List<Group> list) {
 		if (list.isEmpty()) {
