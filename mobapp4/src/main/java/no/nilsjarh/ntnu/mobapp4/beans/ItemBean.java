@@ -111,17 +111,12 @@ public class ItemBean {
 
 	public List<Item> getItemListBySellerQuery(User seller) {
 		Query query = em.createNamedQuery(Item.FIND_ITEMS_BY_USER);
+		query.setParameter("seller",seller.getId());
+		System.out.println("QUERY:" + query.toString());
 		return query.getResultList();
 	}
 	
-	public List<Item> getItemListBySeller(User seller) {
-		if (seller.getOwnedItems().isEmpty()) {
-			return new ArrayList<>();
-		} else {
-			return seller.getOwnedItems();
-		}
-	}
-	
+
 	public List<Item> getPublishedItems() {
 		/// INSERT LOGIC // 
 		return new ArrayList<>();

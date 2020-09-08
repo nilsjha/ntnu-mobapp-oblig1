@@ -41,7 +41,7 @@ import lombok.NoArgsConstructor;
 @NamedQueries({
 	@NamedQuery(name = Item.FIND_ALL_ITEMS, query = "SELECT i FROM items i"),
 	@NamedQuery(name = Item.FIND_ITEMS_BY_USER,
-		query = "SELECT i FROM items i WHERE i.sellerUser LIKE :seller")
+		query = "SELECT i FROM items i WHERE i.sellerUser.id LIKE :seller")
 })
 public class Item implements Serializable {
 
