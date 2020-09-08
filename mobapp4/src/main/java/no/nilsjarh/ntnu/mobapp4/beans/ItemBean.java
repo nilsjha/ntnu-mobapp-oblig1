@@ -33,10 +33,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @Stateless
 public class ItemBean {
 
-	@Inject
-	@ConfigProperty(name = "mp.jwt.verify.issuer", defaultValue = "issuer")
-	String issuer;
-
 	/**
 	 * The application server will inject a DataSource as a way to
 	 * communicate with the database.
@@ -52,7 +48,7 @@ public class ItemBean {
 	EntityManager em;
 
 	public Item addItem(User seller, String title, BigDecimal priceNok) {
-		System.out.println("=== INVOKING EJB: CREATE ITEM ===");
+		System.out.println("=== ITEM EJB: CREATE ITEM ===");
 		System.out.print("Query parameters: title:" + title);
 		Item i = new Item(seller, title, priceNok);
 		Item o = em.merge(i);
@@ -69,7 +65,7 @@ public class ItemBean {
 	}
 
 	public Item getItem(Long id) {
-		System.out.println("=== INVOKING EJB: GET ITEM ===");
+		System.out.println("=== ITEM EJB: GET ITEM ===");
 		System.out.print("Query parameters: id:" + id);
 		if (id == null) {
 			return null;
@@ -85,7 +81,7 @@ public class ItemBean {
 	}
 
 	public Item prepareItemForEdit(Item i) {
-		System.out.println("=== INVOKING EJB: PREPARE EDIT ITEM ===");
+		System.out.println("=== ITEM EJB: PREPARE EDIT ITEM ===");
 		if (i != null) {
 			try {
 				em.lock(i, LockModeType.PESSIMISTIC_WRITE);
@@ -98,7 +94,7 @@ public class ItemBean {
 	}
 
 	public Item saveItemFromEdit(Item toSave) {
-		System.out.println("=== INVOKING EJB: FINISH EDIT ITEM ===");
+		System.out.println("=== ITEM EJB: FINISH EDIT ITEM ===");
 		if (toSave == null) {
 			return null;
 		} else {
@@ -124,7 +120,7 @@ public class ItemBean {
 	}
 
 	public boolean deleteItem(Item i) {
-		System.out.println("=== INVOKING EJB: DELETE ITEM ===");
+		System.out.println("=== ITEM EJB: DELETE ITEM ===");
 		if (i != null) {
 			Long id = i.getId();
 			if (id == null) {
@@ -146,7 +142,7 @@ public class ItemBean {
 		if (seller == null) {
 			return new ArrayList<>();
 		}
-		System.out.println("=== INVOKING EJB: FIND ITEM BY USER QUERY ===");
+		System.out.println("=== ITEM EJB: FIND ITEM BY USER QUERY ===");
 		Query query = em.createNamedQuery(Item.FIND_ITEMS_BY_USER);
 		query.setParameter("seller", seller.getId());
 
@@ -158,8 +154,24 @@ public class ItemBean {
 	}
 
 	public List<Item> getPublishedItems() {
-		System.out.println("=== INVOKING EJB: FIND ALL ITEMS QUERY ===");
+		System.out.println("=== ITEM EJB: FIND ALL ITEMS QUERY ===");
+		Query query = em.createNamedQuery(Item.FIND_ALL_ITEMS_UNSOLD);
+		
+		// FIXME: INSERT LOGIC/FILTERING FOR AND
+		//        PUBLISH/EXPIRE DATES
+
+		List<Item> allItems = new ArrayList<Item>(query.getResultList());
+		System.out.println("- Found items........: " + returnItemNames(allItems));
+
+		return allItems;
+	}
+
+	public List<Item> getAllItems() {
+		System.out.println("=== ITEM EJB: FIND ALL ITEMS QUERY ===");
 		Query query = em.createNamedQuery(Item.FIND_ALL_ITEMS);
+		
+		// FIXME: INSERT LOGIC/FILTERING FOR SOLD ITEMS(SQL?) AND
+		//        PUBLISH/EXPIRE DATES
 
 		List<Item> allItems = new ArrayList<Item>(query.getResultList());
 		System.out.println("- Found items........: " + returnItemNames(allItems));

@@ -54,7 +54,7 @@ public class UserBean {
 	PasswordHash hasher;
 
 	public User findUserById(String id) {
-		System.out.println("=== INVOKING EJB: FIND USER ===");
+		System.out.println("=== USER EJB: FIND USER ===");
 		System.out.print("Query parameters: id:" + id);
 		if (id == null) {
 			return null;
@@ -74,7 +74,7 @@ public class UserBean {
 	}
 
 	public User findUserByEmail(String email) {
-		System.out.println("=== INVOKING EJB: FIND USER ===");
+		System.out.println("=== USER EJB: FIND USER ===");
 		Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
 		if (email == null) {
 			return null;
@@ -108,14 +108,14 @@ public class UserBean {
 	 * @return
 	 */
 	public User createUser(String email, String password) {
-		System.out.println("=== INVOKING EJB: CREATE USER ===");
+		System.out.println("=== USER EJB: CREATE USER ===");
 		System.out.print("Query parameters: mail:" + email
 			+ ", pass:" + password);
 		if (email == null || password == null) return null;
 		User u = findUserByEmail(email);
 
 		if (u != null) {
-			System.out.println("=== INVOKING EJB: CREATE USER ===");
+			System.out.println("=== USER EJB: CREATE USER ===");
 			System.out.println("- Id...............: " + u.getId());
 			System.out.println("- Status...........: " + "Already Exist");
 			//System.out.println("- Password....: " + u.getPassword());
@@ -130,7 +130,7 @@ public class UserBean {
 				Group.USER);
 			newUser.getGroups().add(usergroup);
 			User created = em.merge(newUser);
-			System.out.println("=== INVOKING EJB: CREATE USER ===");
+			System.out.println("=== USER EJB: CREATE USER ===");
 			System.out.println("- Status...........: " + "Created OK");
 			System.out.println("- In database as id: " + created.getId());
 			System.out.println("- Group(s).........: " + returnGroupNames(created.getGroups()));
@@ -142,7 +142,7 @@ public class UserBean {
 	public void getUserInfo(User user) {
 		if (user != null) {
 			user = em.find(User.class, user.getId());
-			System.out.println("=== INVOKING EJB: USERINFO ===");
+			System.out.println("=== USER EJB: USERINFO ===");
 			System.out.println("- In database as id: " + user.getId());
 			System.out.println("- Group(s).........: " + returnGroupNames(user.getGroups()));
 		}
@@ -152,7 +152,7 @@ public class UserBean {
 	public User addGroup(User user, String role, boolean add) {
 		Group groupToChange = findGroupByName(role);
 		if (groupToChange == null || user == null) {
-			System.out.println("=== INVOKING EJB: GROUP MGMT ===");
+			System.out.println("=== USER EJB: GROUP MGMT ===");
 			System.out.println("- Status...........: " + "Parameters invalid");
 			return null;
 		} else {
@@ -170,7 +170,7 @@ public class UserBean {
 				}
 			}
 
-			System.out.println("=== INVOKING EJB: GROUP MGMT ===");
+			System.out.println("=== USER EJB: GROUP MGMT ===");
 			System.out.println("- User.............: " + user.getId());
 			System.out.println("- Current groups...: " + returnGroupNames(currentGroups));
 			System.out.println("- Groups to " + action + ": " + groupToChange.getName());

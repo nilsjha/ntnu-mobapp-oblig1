@@ -83,14 +83,27 @@ public class MarketplaceService {
 	@Inject
 	ItemBean ib;
 
+	@Inject
+	PurchaseBean pb;
+
 	@GET
 	@Path("list")
 	@RolesAllowed(value = {Group.USER})
-	public Response listItems() {
+	public Response listItems(@QueryParam("list-all") boolean listAll) {
 		System.out.println("=== INVOKING REST-MARKET: LIST ALL ITEMS ===");
-
-		return Response.ok(ib.getPublishedItems()).build();
-
+		System.out.print("Query parameters: listall:" + listAll);
+		try {
+			if (listAll) {
+				System.out.print("Mode.....:" + "LISTING ALL+SOLD ITEMS");
+				return Response.ok(ib.getAllItems()).build();
+			} else {
+				// NOT WORKING, EMPTY LIST RESULTS
+				System.out.print("Mode.....:" + "LISTING PUBLIC ITEMS");
+				return Response.ok(ib.getPublishedItems()).build();
+			}
+		} catch (Exception e) {
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
 	}
 
 	@GET
@@ -141,15 +154,23 @@ public class MarketplaceService {
 		return Response.ok(itemToView).build();
 
 	}
-	
+
 	@GET
 	@Path("purchase")
 	@RolesAllowed(value = {Group.USER})
-	public Response purchaseItem() {
-		
-		return Response.status(Response.Status.BAD_REQUEST).build();
+	public Response purchaseItem(@QueryParam("item") Long itemId) {
+		System.out.println("=== INVOKING REST-MARKET: PURCHASE ITEM ===");
+		System.out.print("Query parameters: id:" + itemId);
+		Response r = Response.status(Response.Status.BAD_REQUEST).build();
+		User buyer = em.find(User.class, principal.getName());
+		if ((buyer == null) || (itemId == null)) {
+			return r;
+		} else {
+			r = Response.ok(pb.addPurchase(buyer, itemId)).build();
+		}
+
+		return r;
 	}
-	
 
 	@PATCH
 	@Path("edit")
@@ -170,7 +191,7 @@ public class MarketplaceService {
 		@FormParam("price") BigDecimal pNok) {
 		System.out.println("=== INVOKING REST-MARKET: UPDATE ITEM ===");
 		System.out.print("Query parameters: id:" + id);
-		Response  r = Response.status(Response.Status.BAD_REQUEST).build();
+		Response r = Response.status(Response.Status.BAD_REQUEST).build();
 		Item toEdit = ib.getItem(id);
 		User seller = em.find(User.class, principal.getName());
 		if ((toEdit != null) && (seller != null && descr != null && pNok != null)) {
@@ -181,7 +202,7 @@ public class MarketplaceService {
 				toEdit.setDescription(descr);
 				toEdit.setPriceNok(pNok);
 				Item edited = ib.saveItemFromEdit(toEdit);
-				r = Response.ok(edited).build();	
+				r = Response.ok(edited).build();
 			}
 		}
 		return r;

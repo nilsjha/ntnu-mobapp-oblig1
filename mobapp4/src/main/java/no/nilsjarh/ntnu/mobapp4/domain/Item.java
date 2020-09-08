@@ -39,15 +39,17 @@ import lombok.NoArgsConstructor;
 @Entity(name = "items")
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = false, exclude={"sellerUser"})
 @NamedQueries({
 	@NamedQuery(name = Item.FIND_ALL_ITEMS, query = "SELECT i FROM items i"),
+	@NamedQuery(name = Item.FIND_ALL_ITEMS_UNSOLD,
+		query = "SELECT i FROM items i WHERE i.purchase.id IS NULL"),
 	@NamedQuery(name = Item.FIND_ITEMS_BY_USER,
 		query = "SELECT i FROM items i WHERE i.sellerUser.id LIKE :seller")
 })
 public class Item implements Serializable {
 
 	public final static String FIND_ALL_ITEMS = "findAllItems";
+	public final static String FIND_ALL_ITEMS_UNSOLD = "findUnsoldItems";
 	public final static String FIND_ITEMS_BY_USER = "findItemsByUser";
 
 	@Id
