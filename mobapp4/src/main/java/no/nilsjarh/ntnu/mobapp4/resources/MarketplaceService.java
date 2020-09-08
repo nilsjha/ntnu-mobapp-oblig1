@@ -213,18 +213,28 @@ public class MarketplaceService {
 		@FormParam("description") String descr,
 		@FormParam("price") BigDecimal pNok) {
 		System.out.println("=== INVOKING REST-MARKET: UPDATE ITEM ===");
-		System.out.print("Query parameters: id:" + id);
+		System.out.print("Query parameters: id:" + id + " title:" 
+			+ title + " descr:" + descr + " price:" + pNok);
 		Response r = Response.status(Response.Status.BAD_REQUEST).build();
 		Item toEdit = ib.getItem(id);
 		User seller = em.find(User.class, principal.getName());
-		if ((toEdit != null) && (seller != null && descr != null && pNok != null)) {
+		if ((toEdit == null) || (seller == null)) {
+			System.out.println("=== INVOKING REST-MARKET: UPDATE ITEM ===");
+			System.out.println("Status:.............: STOP(invalid args)");
+			System.out.println(title + "," + descr + ","+ pNok);
+			
 		} else {
 			if (ib.verifyOwnedItem(toEdit, seller)) {
+			System.out.println("=== INVOKING REST-MARKET: UPDATE ITEM ===");
+			System.out.println("Status:.............: Valid input");
 				ib.prepareItemForEdit(toEdit);
-				toEdit.setTitle(title);
-				toEdit.setDescription(descr);
-				toEdit.setPriceNok(pNok);
+				if (descr != null) toEdit.setDescription(descr);
+				if (title != null) toEdit.setTitle(title);
+				if (pNok != null) toEdit.setPriceNok(pNok);
 				Item edited = ib.saveItemFromEdit(toEdit);
+				if(edited != null) {	
+					System.out.println("DB write:..........: Success");
+				}
 				r = Response.ok(edited).build();
 			}
 		}
