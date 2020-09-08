@@ -29,6 +29,7 @@ import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
@@ -38,6 +39,7 @@ import lombok.NoArgsConstructor;
 @Entity(name = "items")
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false, exclude={"sellerUser"})
 @NamedQueries({
 	@NamedQuery(name = Item.FIND_ALL_ITEMS, query = "SELECT i FROM items i"),
 	@NamedQuery(name = Item.FIND_ITEMS_BY_USER,

@@ -110,8 +110,7 @@ public class MarketplaceService {
 	@RolesAllowed(value = {Group.USER})
 	public Response addItem(@FormParam("title") String title, @FormParam("price") BigDecimal price) {
 		System.out.println("=== INVOKING REST-MARKET: CREATE ITEM ===");
-		System.out.print("Query parameters:");
-		System.out.print("title:" + title + ", price:" + price);
+		System.out.print("Query parameters: title:" + title + ", price:" + price);
 		Item createdItem = ib.addItem(em.find(User.class,
 			principal.getName()), title, price);
 		if (createdItem != null) {
@@ -125,9 +124,19 @@ public class MarketplaceService {
 	@GET
 	@Path("view")
 	@RolesAllowed(value = {Group.USER})
-	public Response viewItem() {
+	public Response viewItem(@QueryParam("id") Long id) {
+		System.out.println("=== INVOKING REST-MARKET: VIEW ITEM ===");
+		System.out.print("Query parameters: id:" + id);
+		Item itemToView = ib.getItem(id);
+		
+		if (itemToView == null) {
+			System.out.print("Found item.....:" + "<none>");
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+		
+		System.out.print("Found item.....:" + itemToView.getId());
+		return Response.ok(itemToView).build();
 
-		return Response.status(Response.Status.BAD_REQUEST).build();
 	}
 
 	@PATCH

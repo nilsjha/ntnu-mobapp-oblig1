@@ -56,6 +56,7 @@ public class UserBean {
 	public User findUserById(String id) {
 		System.out.println("=== INVOKING EJB: FIND USER ===");
 		System.out.print("Query parameters: id:" + id);
+		if (id == null) return null;
 		User found = em.find(User.class, id);
 
 		if (found == null) {
@@ -73,6 +74,7 @@ public class UserBean {
 	public User findUserByEmail(String email) {
 		System.out.println("=== INVOKING EJB: FIND USER ===");
 		Query query = em.createNamedQuery(User.FIND_USER_BY_EMAIL);
+		if (email == null) return null;
 		query.setParameter("email", email);
 		System.out.print("Query parameters: mail:" + email);
 		List<User> foundUsers = query.getResultList();
@@ -105,6 +107,7 @@ public class UserBean {
 		System.out.println("=== INVOKING EJB: CREATE USER ===");
 		System.out.print("Query parameters: mail:" + email
 			+ ", pass:" + password);
+		if (email == null) return null;
 		User u = findUserByEmail(email);
 
 		if (!(u == null)) {

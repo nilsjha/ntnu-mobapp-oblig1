@@ -63,6 +63,7 @@ public class ItemBean {
 	public Item getItem(Long id) {
 		System.out.println("=== INVOKING EJB: GET ITEM ===");
 		System.out.print("Query parameters: id:" + id);
+		if (id == null) return null;
 		return em.find(Item.class, id);
 	}
 
@@ -116,11 +117,12 @@ public class ItemBean {
 	}
 
 	public List<Item> getItemListBySellerQuery(User seller) {
+		em.flush();
 		System.out.println("=== INVOKING EJB: FIND ITEM BY USER QUERY ===");
 		Query query = em.createNamedQuery(Item.FIND_ITEMS_BY_USER);
 		query.setParameter("seller",seller.getId());
 		
-		List<Item> foundItems = query.getResultList();
+		List<Item> foundItems = new ArrayList<Item>(query.getResultList());
 		
 		System.out.println("- Seller.............: " + seller.getId());
 		System.out.println("- Found items........: " + returnItemNames(foundItems));
