@@ -26,6 +26,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import lombok.extern.java.Log;
@@ -87,7 +88,7 @@ public class MarketplaceService {
 	@RolesAllowed(value = {Group.USER})
 	public Response listItems() {
 		System.out.println("=== INVOKING REST-MARKET: LIST ALL ITEMS ===");
-		
+
 		return Response.ok(ib.getPublishedItems()).build();
 
 	}
@@ -130,12 +131,12 @@ public class MarketplaceService {
 		System.out.println("=== INVOKING REST-MARKET: VIEW ITEM ===");
 		System.out.print("Query parameters: id:" + id);
 		Item itemToView = ib.getItem(id);
-		
+
 		if (itemToView == null) {
 			System.out.print("Found item.....:" + "<none>");
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		}
-		
+
 		System.out.print("Found item.....:" + itemToView.getId());
 		return Response.ok(itemToView).build();
 
@@ -149,6 +150,34 @@ public class MarketplaceService {
 		return Response.status(Response.Status.BAD_REQUEST).build();
 	}
 
+	@POST
+	@Path("update")
+	@RolesAllowed(value = {Group.USER})
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response updateItem(
+		@QueryParam("id") Long id,
+		@FormParam("title") String title,
+		@FormParam("descrption") String descr,
+		@FormParam("price") BigDecimal pNok) {
+		System.out.println("=== INVOKING REST-MARKET: UPDATE ITEM ===");
+		System.out.print("Query parameters: id:" + id);
+		Response  r = Response.status(Response.Status.BAD_REQUEST).build();
+		Item toEdit = ib.getItem(id);
+		User seller = em.find(User.class, principal.getName());
+		if ((toEdit != null) && (seller != null && descr != null && pNok != null)) {
+		} else {
+			if (ib.verifyOwnedItem(toEdit, seller)) {
+				ib.prepareItemForEdit(toEdit);
+				toEdit.setTitle(title);
+				toEdit.setDescription(descr);
+				toEdit.setPriceNok(pNok);
+				Item edited = ib.saveItemFromEdit(toEdit);
+				r = Response.ok(edited).build();	
+			}
+		}
+		return r;
+	}
+
 	@DELETE
 	@Path("remove")
 	@RolesAllowed(value = {Group.USER})
@@ -158,19 +187,19 @@ public class MarketplaceService {
 		Item itemToDelete = ib.getItem(id);
 		if (itemToDelete != null) {
 			System.out.print("Found item.....:" + itemToDelete.getId());
-		if (ib.verifyOwnedItem(itemToDelete, em.find(User.class,
-			principal.getName()))) {
-			
-			if (ib.deleteItem(itemToDelete)) {
-				return Response.ok("").build();
-			} else {
-				
+			if (ib.verifyOwnedItem(itemToDelete, em.find(User.class,
+				principal.getName()))) {
+
+				if (ib.deleteItem(itemToDelete)) {
+					return Response.ok("").build();
+				} else {
+
+				}
+
 			}
-			
+			System.out.print("State..........:" + "NO ACCESS");
 		}
-		System.out.print("State..........:" + "NO ACCESS");
-		}
-		
+
 		System.out.print("State..........:" + "NO ITEM");
 		return Response.status(Response.Status.BAD_REQUEST).build();
 	}
