@@ -116,9 +116,9 @@ public class ItemBean {
 	
 	public List<Item> getItemListBySeller(User seller) {
 		if (seller.getOwnedItems().isEmpty()) {
-			return null;
+			return new ArrayList<>();
 		} else {
-			return new ArrayList<Item>(seller.getOwnedItems());
+			return seller.getOwnedItems();
 		}
 	}
 	

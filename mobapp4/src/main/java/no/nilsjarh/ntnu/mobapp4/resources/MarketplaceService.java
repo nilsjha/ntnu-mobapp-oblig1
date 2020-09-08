@@ -87,7 +87,20 @@ public class MarketplaceService {
 	@RolesAllowed(value = {Group.USER})
 	public Response listItems() {
 
-	return Response.status(Response.Status.BAD_REQUEST).build();
+		return Response.status(Response.Status.BAD_REQUEST).build();
+	}
+
+	@GET
+	@Path("listowned")
+	@RolesAllowed(value = {Group.USER})
+	public Response listOwnItems() {
+		User u = em.find(User.class,
+			principal.getName());
+		if (u != null) {
+			return Response.ok(ib.getItemListBySellerQuery(u)).build();
+		} else {
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
 	}
 
 	@POST
@@ -98,10 +111,10 @@ public class MarketplaceService {
 			principal.getName()), title, price);
 		if (createdItem != null) {
 			return Response.ok(createdItem).build();
-			
+
 		}
 
-	return Response.status(Response.Status.BAD_REQUEST).build();
+		return Response.status(Response.Status.BAD_REQUEST).build();
 	}
 
 	@GET
@@ -109,7 +122,7 @@ public class MarketplaceService {
 	@RolesAllowed(value = {Group.USER})
 	public Response viewItem() {
 
-	return Response.status(Response.Status.BAD_REQUEST).build();
+		return Response.status(Response.Status.BAD_REQUEST).build();
 	}
 
 	@PATCH
@@ -117,16 +130,15 @@ public class MarketplaceService {
 	@RolesAllowed(value = {Group.USER})
 	public Response editItem() {
 
-	return Response.status(Response.Status.BAD_REQUEST).build();
+		return Response.status(Response.Status.BAD_REQUEST).build();
 	}
 
 	@DELETE
-	@Path("edit")
+	@Path("remove")
 	@RolesAllowed(value = {Group.USER})
 	public Response deleteItem() {
 
-	return Response.status(Response.Status.BAD_REQUEST).build();
+		return Response.status(Response.Status.BAD_REQUEST).build();
 	}
-
 
 }
