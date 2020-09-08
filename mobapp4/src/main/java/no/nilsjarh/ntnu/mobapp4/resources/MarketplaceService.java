@@ -94,9 +94,11 @@ public class MarketplaceService {
 	@Path("listowned")
 	@RolesAllowed(value = {Group.USER})
 	public Response listOwnItems() {
+		System.out.println("=== INVOKING REST-MARKET: LIST OWN ITEMS ===");
 		User u = em.find(User.class,
 			principal.getName());
 		if (u != null) {
+			System.out.print("Query parameters: user:" + u.getId());
 			return Response.ok(ib.getItemListBySellerQuery(u)).build();
 		} else {
 			return Response.status(Response.Status.BAD_REQUEST).build();
@@ -107,6 +109,9 @@ public class MarketplaceService {
 	@Path("add")
 	@RolesAllowed(value = {Group.USER})
 	public Response addItem(@FormParam("title") String title, @FormParam("price") BigDecimal price) {
+		System.out.println("=== INVOKING REST-MARKET: CREATE ITEM ===");
+		System.out.print("Query parameters:");
+		System.out.print("title:" + title + ", price:" + price);
 		Item createdItem = ib.addItem(em.find(User.class,
 			principal.getName()), title, price);
 		if (createdItem != null) {
