@@ -32,6 +32,7 @@ import javax.ws.rs.core.UriInfo;
 import lombok.extern.java.Log;
 import no.nilsjarh.ntnu.mobapp4.beans.*;
 import no.nilsjarh.ntnu.mobapp4.domain.Item;
+import no.nilsjarh.ntnu.mobapp4.domain.Purchase;
 import no.nilsjarh.ntnu.mobapp4.domain.User;
 import no.ntnu.tollefsen.auth.Group;
 import no.ntnu.tollefsen.auth.KeyService;
@@ -85,6 +86,9 @@ public class MarketplaceService {
 
 	@Inject
 	PurchaseBean pb;
+
+	@Inject
+	MailBean mb;
 
 	@GET
 	@Path("list")
@@ -187,7 +191,11 @@ public class MarketplaceService {
 		if ((buyer == null) || (itemId == null)) {
 			return r;
 		} else {
-			r = Response.ok(pb.addPurchase(buyer, itemId)).build();
+			Purchase p = pb.addPurchase(buyer, itemId);
+			if (p != null) {
+				r = Response.ok(p).build();
+				mb.sendEmail(buyer.getEmail(), "Item purchased", mb.generateMailBody(p, p.getItem().getSellerUser(), buyer));
+			}
 		}
 
 		return r;
@@ -242,11 +250,11 @@ public class MarketplaceService {
 					}
 					r = Response.ok(edited).build();
 				} else {
-					
-				System.out.println("DB Write:.............: Abort, already sold");
-				return r;
+
+					System.out.println("DB Write:.............: Abort, already sold");
+					return r;
 				}
-			System.out.println("DB Write:.............: Abort, not owner");
+				System.out.println("DB Write:.............: Abort, not owner");
 			}
 		}
 		return r;

@@ -8,6 +8,8 @@ package no.nilsjarh.ntnu.mobapp4.domain;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,6 +21,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Temporal;
@@ -30,6 +33,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
@@ -39,6 +43,7 @@ import lombok.NoArgsConstructor;
 @Entity(name = "items")
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false, exclude={"attachments"})
 @NamedQueries({
 	@NamedQuery(name = Item.FIND_ALL_ITEMS, query = "SELECT i FROM items i"),
 	@NamedQuery(name = Item.FIND_ALL_ITEMS_UNSOLD,
@@ -108,5 +113,13 @@ public class Item implements Serializable {
 		this.title = title;
 		this.priceNok = priceNok;
 	}
+
+	/**
+	 * REFERENCING SIDE *
+	 */
+	@JsonbTransient
+	@Getter
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "attachedItem")
+	private List<Attachment> attachments;
 	 
 }

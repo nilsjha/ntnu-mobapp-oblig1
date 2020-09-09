@@ -49,6 +49,9 @@ public class PurchaseBean {
 	@Inject
 	ItemBean ib;
 
+	@Inject
+	MailBean mb;
+
 	public Purchase addPurchase(User buyer, Long itemId) {
 		System.out.println("=== PURCHASE EJB: CREATE PURCHASE ===");
 		System.out.print("Query parameters: buyer:" + buyer);
@@ -76,12 +79,14 @@ public class PurchaseBean {
 			ib.saveItemFromEdit(item);
 			em.refresh(o);
 			em.refresh(item);
+			
+			User seller = item.getSellerUser();
 
 			System.out.println("=== PURCHASE EJB: CREATE PURCHASE ===");
 			System.out.println("- Status...........: " + "Purchase completed");
 			System.out.println("- In database as id: " + o.getId());
-			System.out.println("- Buyer............: " + o.getBuyerUser());
-			System.out.println("- Seller...........: " + item.getSellerUser());
+			System.out.println("- Buyer............: " + buyer);
+			System.out.println("- Seller...........: " + seller);
 			System.out.println("- Price ........NOK: " + item.getPriceNok());
 			System.out.println("- Completed on.....: " + o.getPurchaseDate());
 			System.out.println("- Item UID.........: " + item.getId());
@@ -97,7 +102,7 @@ public class PurchaseBean {
 			return null;
 		}
 	}
-
+	
 	public Purchase getPurchase(Long id) {
 		System.out.println("=== PURCHASE EJB: GET PURCHASE ===");
 		System.out.print("Query parameters: id:" + id);
