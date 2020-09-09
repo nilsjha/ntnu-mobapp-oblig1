@@ -90,7 +90,7 @@ public class MarketplaceService {
 	 * path to store photos
 	 */
 	@Inject
-	@ConfigProperty(name = "photo.storage.path", defaultValue = "chatphotos")
+	@ConfigProperty(name = "photo.storage.path", defaultValue = "photos")
 	String photoPath;
 
 	@Inject
@@ -328,6 +328,8 @@ public class MarketplaceService {
 		@FormDataParam("description") String description,
 		FormDataMultiPart multiPart) {
 		Response r = Response.notModified().build();
+		
+		// TO BE MIGRATED INTO ATTACHMENTBEAN IN FUTURE
 
 		try {
 			User user = em.find(User.class, sc.getUserPrincipal().getName());
@@ -354,6 +356,7 @@ public class MarketplaceService {
 		} catch (IOException ex) {
 			System.err.println("UNABLE TO SAVE PATH: " + Paths.get(getPhotoPath()).getFileName());
 			System.err.println("UNABLE TO SAVE ROOT: " + Paths.get(getPhotoPath()).getRoot());
+			System.err.println("UNABLE TO SAVE PARENT: " + Paths.get(getPhotoPath()).getParent());
 			Logger.getLogger(MarketplaceService.class.getName()).log(Level.SEVERE, null, ex);
 			return Response.serverError().build();
 		}

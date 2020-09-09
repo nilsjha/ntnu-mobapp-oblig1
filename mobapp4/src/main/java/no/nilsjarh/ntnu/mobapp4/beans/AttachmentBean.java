@@ -5,7 +5,12 @@
  */
 package no.nilsjarh.ntnu.mobapp4.beans;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -16,10 +21,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
+import javax.ws.rs.core.Response;
 import lombok.Getter;
 import lombok.extern.java.Log;
 import no.nilsjarh.ntnu.mobapp4.domain.*;
 import no.nilsjarh.ntnu.mobapp4.resources.DatasourceProducer;
+import org.glassfish.jersey.media.multipart.ContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 /**
  *
@@ -43,9 +52,41 @@ public class AttachmentBean {
 	@PersistenceContext
 	EntityManager em;
 
+	@Inject
+	UserBean ub;
+
+	@Inject
+	ItemBean ib;
+
 	
-	public boolean uploadAttachment() {
-		return false;
+	public Item uploadAttachment(Long itemid, FormDataMultiPart multiPart, String path, String descr) {
+		Item i = ib.getItem(itemid);
+		
+		List<FormDataBodyPart> images = multiPart.getFields("image");
+			if (images != null && i != null) {
+				for (FormDataBodyPart part : images) {
+					try {
+						InputStream is = part.getEntityAs(InputStream.class);
+					ContentDisposition meta = part.getContentDisposition();
+
+					String pid = UUID.randomUUID().toString();
+					Files.copy(is, Paths.get(path, pid));
+
+					Attachment attachment = new Attachment(pid, meta.getFileName(), meta.getSize(), meta.getType());
+					if (descr != null) {
+						attachment.setDescription(descr);
+					}
+					attachment.setAttachedItem(i);
+					em.persist(attachment);
+					em.flush();
+					return i;
+					} catch (IOException e) {
+						System.err.println(e);
+						return null;
+					}
+				}
+			}
+			return null;
 	}
 	
 	public boolean deleteAttachment() {
