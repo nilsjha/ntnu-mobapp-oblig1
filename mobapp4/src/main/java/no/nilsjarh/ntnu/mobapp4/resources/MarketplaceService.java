@@ -244,6 +244,7 @@ public class MarketplaceService {
 				} else {
 					
 				System.out.println("DB Write:.............: Abort, already sold");
+				return r;
 				}
 			System.out.println("DB Write:.............: Abort, not owner");
 			}
@@ -265,11 +266,10 @@ public class MarketplaceService {
 
 				if (ib.deleteItem(itemToDelete)) {
 					return Response.ok("").build();
-				} else {
-
 				}
 
 			}
+			System.out.println("=== INVOKING REST-MARKET: DELETE ITEM ===");
 			System.out.print("State..........:" + "NO ACCESS");
 			return Response.status(Response.Status.UNAUTHORIZED).build();
 		}

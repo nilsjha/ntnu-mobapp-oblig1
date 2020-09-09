@@ -68,12 +68,12 @@ public class ItemBean {
 		System.out.println("=== ITEM EJB: GET ITEM ===");
 		System.out.print("Query parameters: id:" + id);
 		if (id == null) {
-		System.out.println("- Id.............: " + "<null>");
+			System.out.println("- Id.............: " + "<null>");
 			return null;
 		}
 		Item found = em.find(Item.class, id);
 		if (found == null) {
-		System.out.println("- Id.............: " + "<Not Found>");
+			System.out.println("- Id.............: " + "<Not Found>");
 			return null;
 		}
 		em.refresh(found);
@@ -129,12 +129,20 @@ public class ItemBean {
 				return false;
 			}
 			System.out.println("- Found item id..: " + id);
-			em.remove(i);
-			em.flush();
-			if (getItem(id) == null) {
-				System.out.println("- Status.........: " + "DELETED");
-				return true;
+			em.refresh(i);
+			if (i.getPurchase() == null) {
+				em.remove(i);
+				em.flush();
+				if (getItem(id) == null) {
+					System.out.println("=== ITEM EJB: DELETE ITEM ===");
+					System.out.println("- Status.........: " + "DELETED");
+					return true;
+				}
+			} else {
+				System.out.print("State..........:" + "STOP - PURCHASED");
+				return false;
 			}
+
 		}
 		System.out.print("State..........:" + "ERROR ON DELETE");
 		return false;
@@ -158,10 +166,9 @@ public class ItemBean {
 	public List<Item> getPublishedItems() {
 		System.out.println("=== ITEM EJB: FIND PUBLIC ITEMS QUERY ===");
 		Query query = em.createNamedQuery(Item.FIND_ALL_ITEMS_UNSOLD);
-		
+
 		// FIXME: INSERT LOGIC/FILTERING FOR AND
 		//        PUBLISH/EXPIRE DATES
-
 		List<Item> allItems = new ArrayList<Item>(query.getResultList());
 		System.out.println("- Found items........: " + returnItemNames(allItems));
 
@@ -171,7 +178,6 @@ public class ItemBean {
 	public List<Item> getAllItems() {
 		System.out.println("=== ITEM EJB: FIND ALL ITEMS QUERY ===");
 		Query query = em.createNamedQuery(Item.FIND_ALL_ITEMS);
-		
 
 		List<Item> allItems = new ArrayList<Item>(query.getResultList());
 		System.out.println("- Found items........: " + returnItemNames(allItems));
