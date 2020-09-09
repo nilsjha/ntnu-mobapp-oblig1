@@ -50,39 +50,39 @@ public class MailBean {
 	EntityManager em;
 
 	@Inject
-	@ConfigProperty(name = "mail.smtp.host")
+	@ConfigProperty(name = "mail.smtp.host", defaultValue = "localhost")
 	private String smtpHost;
 
 	@Inject
-	@ConfigProperty(name = "mail.smtp.username")
+	@ConfigProperty(name = "mail.smtp.username", defaultValue = "user")
 	private String smtpUser;
 
 	@Inject
-	@ConfigProperty(name = "mail.smtp.sender")
+	@ConfigProperty(name = "mail.smtp.sender", defaultValue = "fanten@norge.no")
 	private String smtpSender;
 
 	@Inject
-	@ConfigProperty(name = "mail.smtp.password")
+	@ConfigProperty(name = "mail.smtp.password", defaultValue = "passord")
 	private String smtpPassword;
 
 	@Inject
-	@ConfigProperty(name = "app.contact.brandname")
+	@ConfigProperty(name = "app.contact.brandname", defaultValue = "YourCoolMarketplace")
 	private String appBrandname;
 
 	@Inject
-	@ConfigProperty(name = "app.contact.telephone")
+	@ConfigProperty(name = "app.contact.telephone", defaultValue = "80099999")
 	private String appBrandTelephone;
 
 	@Inject
-	@ConfigProperty(name = "app.contact.website")
+	@ConfigProperty(name = "app.contact.website", defaultValue = "exmaple.com")
 	private String appBrandWeb;
 
 	@Inject
-	@ConfigProperty(name = "app.contact.address")
+	@ConfigProperty(name = "app.contact.address", defaultValue = "Pb 12345, 6000 Ålesund")
 	private String appBrandAddress;
 
 	@Inject
-	@ConfigProperty(name = "app.contact.gdpr")
+	@ConfigProperty(name = "app.contact.gdpr", defaultValue = "")
 	private String appBrandLinkGdpr;
 
 	/**

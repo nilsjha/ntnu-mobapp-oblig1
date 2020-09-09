@@ -5,7 +5,15 @@
  */
 package no.nilsjarh.ntnu.mobapp4.resources;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Resource;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
@@ -28,9 +36,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import lombok.extern.java.Log;
 import no.nilsjarh.ntnu.mobapp4.beans.*;
+import no.nilsjarh.ntnu.mobapp4.domain.Attachment;
 import no.nilsjarh.ntnu.mobapp4.domain.Item;
 import no.nilsjarh.ntnu.mobapp4.domain.Purchase;
 import no.nilsjarh.ntnu.mobapp4.domain.User;
@@ -38,6 +48,10 @@ import no.ntnu.tollefsen.auth.Group;
 import no.ntnu.tollefsen.auth.KeyService;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.glassfish.jersey.media.multipart.ContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 /**
  *
@@ -72,6 +86,13 @@ public class MarketplaceService {
 	@PersistenceContext
 	EntityManager em;
 
+	/**
+	 * path to store photos
+	 */
+	@Inject
+	@ConfigProperty(name = "photo.storage.path", defaultValue = "chatphotos")
+	String photoPath;
+
 	@Inject
 	PasswordHash hasher;
 
@@ -89,6 +110,9 @@ public class MarketplaceService {
 
 	@Inject
 	MailBean mb;
+
+	@Context
+	SecurityContext sc;
 
 	@GET
 	@Path("list")
@@ -234,7 +258,7 @@ public class MarketplaceService {
 			if (ib.verifyOwnedItem(toEdit, seller)) {
 				System.out.println("=== INVOKING REST-MARKET: UPDATE ITEM ===");
 				System.out.println("Status:.............: Verified seller " + seller.getId());
-				if (toEdit.getPurchase().getId() == null) {
+				if (toEdit.getPurchase() == null) {
 					ib.prepareItemForEdit(toEdit);
 					if (descr != null) {
 						toEdit.setDescription(descr);
@@ -285,6 +309,60 @@ public class MarketplaceService {
 
 		System.out.print("State..........:" + "NO ITEM");
 		return Response.status(Response.Status.BAD_REQUEST).build();
+	}
+
+	/**
+	 * Accepts a multipart POST image
+	 *
+	 * @param itemid id of item to attach image to
+	 * @param description text description of image
+	 * @param multiPart used to extract the image data
+	 * @return
+	 */
+	@POST
+	@Path("attach")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({Group.USER})
+	public Response sendMessage(@FormDataParam("itemid") Long itemid,
+		@FormDataParam("description") String description,
+		FormDataMultiPart multiPart) {
+		Response r = Response.notModified().build();
+
+		try {
+			User user = em.find(User.class, sc.getUserPrincipal().getName());
+			Item i = ib.getItem(itemid);
+			List<FormDataBodyPart> images = multiPart.getFields("image");
+			if (images != null && i != null) {
+				for (FormDataBodyPart part : images) {
+					InputStream is = part.getEntityAs(InputStream.class);
+					ContentDisposition meta = part.getContentDisposition();
+
+					String pid = UUID.randomUUID().toString();
+					Files.copy(is, Paths.get(getPhotoPath(), pid));
+
+					Attachment attachment = new Attachment(pid, meta.getFileName(), meta.getSize(), meta.getType());
+					attachment.setAttachedItem(i);
+					if (description != null) {
+						attachment.setDescription(description);
+					}
+					em.persist(attachment);
+					em.flush();
+					r = Response.ok(i).build();
+				}
+			}
+		} catch (IOException ex) {
+			System.err.println("UNABLE TO SAVE PATH: " + Paths.get(getPhotoPath()).getFileName());
+			System.err.println("UNABLE TO SAVE ROOT: " + Paths.get(getPhotoPath()).getRoot());
+			Logger.getLogger(MarketplaceService.class.getName()).log(Level.SEVERE, null, ex);
+			return Response.serverError().build();
+		}
+
+		return r;
+	}
+
+	private String getPhotoPath() {
+		return photoPath;
 	}
 
 }
