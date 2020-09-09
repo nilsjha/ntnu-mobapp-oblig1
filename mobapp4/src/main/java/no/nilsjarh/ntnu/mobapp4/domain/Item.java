@@ -43,6 +43,7 @@ import lombok.NoArgsConstructor;
 @Entity(name = "items")
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false, exclude={"attachments"})
 @NamedQueries({
 	@NamedQuery(name = Item.FIND_ALL_ITEMS, query = "SELECT i FROM items i"),
 	@NamedQuery(name = Item.FIND_ALL_ITEMS_UNSOLD,
@@ -119,6 +120,6 @@ public class Item implements Serializable {
 	@JsonbTransient
 	@Getter
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "attachedItem")
-	public List<Attachment> attachments;
+	private List<Attachment> attachments;
 	 
 }

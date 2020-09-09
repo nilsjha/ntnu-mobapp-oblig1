@@ -30,7 +30,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = false, exclude={"attachedItem"})
 public class Attachment {
 	
 	@Id

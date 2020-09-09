@@ -18,6 +18,7 @@ import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 import lombok.Getter;
 import lombok.extern.java.Log;
+import no.nilsjarh.ntnu.mobapp4.domain.*;
 import no.nilsjarh.ntnu.mobapp4.resources.DatasourceProducer;
 
 /**
@@ -47,11 +48,17 @@ public class AttachmentBean {
 		return false;
 	}
 	
-	public boolean attachItemToAttachment() {
+	public boolean deleteAttachment() {
 		return false;
 	}
 	
-	public boolean removeItemFromAttachment() {
+	
+	
+	public boolean attachToItem(Long itemid, Attachment a) {
+		return false;
+	}
+	
+	public boolean removeFromItem(Long itemid, Attachment a) {
 		return false;
 	}
 	
