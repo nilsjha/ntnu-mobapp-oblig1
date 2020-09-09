@@ -36,21 +36,27 @@ public class Attachment {
 	@Id
 	String id;
 
+	@JsonbTransient
 	String path;
 	
 	String description;
 
+
+	@JsonbTransient
 	long filesize;
 	
+	
+	@JsonbTransient
 	String mimeType;
 
 	/**
 	 * OWNING SIDE *
 	 */
 	@Nullable
+	@JsonbTransient
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
 	@JoinColumn(name = "attached_item_id", referencedColumnName = "id",
-		nullable = false)
+		nullable = true)
 	private Item attachedItem;
 	
 	public Attachment(String id, String filename, long size, String type) {

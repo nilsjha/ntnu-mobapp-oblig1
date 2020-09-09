@@ -117,9 +117,8 @@ public class Item implements Serializable {
 	/**
 	 * REFERENCING SIDE *
 	 */
-	@JsonbTransient
 	@Getter
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "attachedItem")
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "attachedItem")
 	private List<Attachment> attachments;
 	 
 }

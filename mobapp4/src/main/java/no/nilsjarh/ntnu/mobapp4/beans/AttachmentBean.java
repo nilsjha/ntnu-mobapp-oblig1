@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -21,7 +23,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import lombok.Getter;
 import lombok.extern.java.Log;
 import no.nilsjarh.ntnu.mobapp4.domain.*;
@@ -58,36 +62,54 @@ public class AttachmentBean {
 	@Inject
 	ItemBean ib;
 
-	
-	public Item uploadAttachment(Long itemid, FormDataMultiPart multiPart, String path, String descr) {
-		Item i = ib.getItem(itemid);
-		
-		List<FormDataBodyPart> images = multiPart.getFields("image");
+	@Context
+	SecurityContext sc;
+
+	/**
+	 * 
+	 * @param i The Item to attach the attachment to
+	 * @param multiPart MultiPartForm object to retreive the attachment
+	 * @param path Folder path to store the attachment
+	 * @param description A description of the item (optional)
+	 * @return 
+	 */
+	public Item uploadAttachment(Item i, FormDataMultiPart multiPart, String path, String description) {
+		try {
+		System.out.println("=== INVOKING EJB-ATTACHMENT: UPLOAD ===");
+			List<FormDataBodyPart> images = multiPart.getFields("image");
 			if (images != null && i != null) {
 				for (FormDataBodyPart part : images) {
-					try {
-						InputStream is = part.getEntityAs(InputStream.class);
+					InputStream is = part.getEntityAs(InputStream.class);
 					ContentDisposition meta = part.getContentDisposition();
 
 					String pid = UUID.randomUUID().toString();
+					if (!(Files.exists(Paths.get(path)))) {
+						Files.createDirectory(Paths.get(path));
+					}
 					Files.copy(is, Paths.get(path, pid));
 
 					Attachment attachment = new Attachment(pid, meta.getFileName(), meta.getSize(), meta.getType());
-					if (descr != null) {
-						attachment.setDescription(descr);
-					}
 					attachment.setAttachedItem(i);
-					em.persist(attachment);
-					em.flush();
-					return i;
-					} catch (IOException e) {
-						System.err.println(e);
-						return null;
+					if (description != null) {
+						attachment.setDescription(description);
 					}
+					em.persist(attachment);
+					em.persist(i);
+					em.flush();
+					em.refresh(i);
+					return i;
 				}
 			}
-			return null;
+		} catch (IOException ex) {
+			System.err.println("UNABLE TO SAVE PATH: " + Paths.get(path).getFileName());
+			System.err.println("UNABLE TO SAVE ROOT: " + Paths.get(path).getRoot());
+			System.err.println("UNABLE TO SAVE PARENT: " + Paths.get(path).getParent());
+			Logger.getLogger(AttachmentBean.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		return null;
 	}
+	
+	
 	
 	public boolean deleteAttachment() {
 		return false;

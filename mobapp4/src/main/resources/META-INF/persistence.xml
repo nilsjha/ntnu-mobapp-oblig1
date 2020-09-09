@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
-  <persistence-unit name="mpconfig" transaction-type="JTA">
-    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-    <jta-data-source>java:app/jdbc/postgres-microprofile</jta-data-source>
-    <class>no.nilsjarh.ntnu.mobapp4.domain.Item</class>
-    <class>no.nilsjarh.ntnu.mobapp4.domain.Purchase</class>
-    <class>no.nilsjarh.ntnu.mobapp4.domain.User</class>
-    <class>no.ntnu.tollefsen.auth.Group</class>
-    <class>no.nilsjarh.ntnu.mobapp4.domain.Attachment</class>
-    <properties>
-      <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
-      <property name="eclipselink.ddl-generation.output-mode" value="both"/>
-    </properties>
-  </persistence-unit>
+    <persistence-unit name="mpconfig" transaction-type="JTA">
+        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+        <jta-data-source>java:app/jdbc/postgres-microprofile</jta-data-source>
+        <class>no.nilsjarh.ntnu.mobapp4.domain.Item</class>
+        <class>no.nilsjarh.ntnu.mobapp4.domain.Purchase</class>
+        <class>no.nilsjarh.ntnu.mobapp4.domain.User</class>
+        <class>no.ntnu.tollefsen.auth.Group</class>
+        <class>no.nilsjarh.ntnu.mobapp4.domain.Attachment</class>
+        <properties>
+            <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
+            <property name="javax.persistence.query.timeout" value="3000"/>
+            <property name="eclipselink.ddl-generation.output-mode" value="both"/>
+        </properties>
+    </persistence-unit>
 </persistence>
