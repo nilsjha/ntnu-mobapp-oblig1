@@ -68,10 +68,12 @@ public class ItemBean {
 		System.out.println("=== ITEM EJB: GET ITEM ===");
 		System.out.print("Query parameters: id:" + id);
 		if (id == null) {
+		System.out.println("- Id.............: " + "<null>");
 			return null;
 		}
 		Item found = em.find(Item.class, id);
 		if (found == null) {
+		System.out.println("- Id.............: " + "<Not Found>");
 			return null;
 		}
 		em.refresh(found);
@@ -138,7 +140,7 @@ public class ItemBean {
 		return false;
 	}
 
-	public List<Item> getItemListBySellerQuery(User seller) {
+	public List<Item> getItemListBySeller(User seller) {
 		if (seller == null) {
 			return new ArrayList<>();
 		}
@@ -154,7 +156,7 @@ public class ItemBean {
 	}
 
 	public List<Item> getPublishedItems() {
-		System.out.println("=== ITEM EJB: FIND ALL ITEMS QUERY ===");
+		System.out.println("=== ITEM EJB: FIND PUBLIC ITEMS QUERY ===");
 		Query query = em.createNamedQuery(Item.FIND_ALL_ITEMS_UNSOLD);
 		
 		// FIXME: INSERT LOGIC/FILTERING FOR AND
@@ -170,8 +172,6 @@ public class ItemBean {
 		System.out.println("=== ITEM EJB: FIND ALL ITEMS QUERY ===");
 		Query query = em.createNamedQuery(Item.FIND_ALL_ITEMS);
 		
-		// FIXME: INSERT LOGIC/FILTERING FOR SOLD ITEMS(SQL?) AND
-		//        PUBLISH/EXPIRE DATES
 
 		List<Item> allItems = new ArrayList<Item>(query.getResultList());
 		System.out.println("- Found items........: " + returnItemNames(allItems));

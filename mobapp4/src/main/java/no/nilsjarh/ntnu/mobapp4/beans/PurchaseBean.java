@@ -56,8 +56,13 @@ public class PurchaseBean {
 
 		if (item == null || buyer == null) {
 			System.out.println("- Status...........: " + "Item or buyer not found");
-			System.out.println("- In database as id: " + itemId);
-			System.out.println("- Buyer............: " + buyer.getId());
+			System.out.println("- Item UID.........: " + itemId);
+			System.out.println("- Buyer............: " + buyer);
+			return null;
+		} else if (item.getPurchase() != null) {
+			System.out.println("- Status...........: " + "Item already sold");
+			System.out.println("- Item UID.........: " + itemId);
+			System.out.println("- Purchase id......: " + item.getPurchase().getId());
 			return null;
 		}
 

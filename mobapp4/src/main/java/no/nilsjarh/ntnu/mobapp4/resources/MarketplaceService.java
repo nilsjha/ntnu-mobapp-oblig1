@@ -113,32 +113,30 @@ public class MarketplaceService {
 		@QueryParam("as-seller") boolean soldItems,
 		@QueryParam("as-buyer") boolean purchasedItems) {
 		System.out.println("=== INVOKING REST-MARKET: LIST OWN ITEMS ===");
-		
+
 		Response r = Response.status(Response.Status.BAD_REQUEST).build();
 		User u = em.find(User.class, principal.getName());
-		
+
 		if (u != null) {
 			System.out.print("Query parameters: user:" + u.getId()
 				+ "sold:" + soldItems + ", purchased:" + purchasedItems);
-			
+
 			if (!(purchasedItems) && (soldItems)) {
 				// ONLY SOLD ITEMS RETURNED
-				r = Response.ok(ib.getItemListBySellerQuery(u)).build();
+				r = Response.ok(ib.getItemListBySeller(u)).build();
 			} else if (!(soldItems) && (purchasedItems)) {
 				// ONLY PURCHASED ITEMS RETURNED
 				r = Response.ok(pb.getPurchaseListByBuyerQuery(u)).build();
 			} else if ((soldItems) && (purchasedItems)) {
 				// BOTH SOLD AND PURCHASED ITEMS RETURNED
-				
+
 				// FIXME: IMPLEMENT CHAINING OF MULTIPLE JSON/
 				//        RESPONSES
-				
-				
 				r = Response.status(Response.Status.NOT_IMPLEMENTED).build();
 			} else {
 				// NONE
 				r = Response.ok().build();
-				
+
 			}
 		}
 		return r;
@@ -213,7 +211,7 @@ public class MarketplaceService {
 		@FormParam("description") String descr,
 		@FormParam("price") BigDecimal pNok) {
 		System.out.println("=== INVOKING REST-MARKET: UPDATE ITEM ===");
-		System.out.print("Query parameters: id:" + id + " title:" 
+		System.out.print("Query parameters: id:" + id + " title:"
 			+ title + " descr:" + descr + " price:" + pNok);
 		Response r = Response.status(Response.Status.BAD_REQUEST).build();
 		Item toEdit = ib.getItem(id);
@@ -221,21 +219,33 @@ public class MarketplaceService {
 		if ((toEdit == null) || (seller == null)) {
 			System.out.println("=== INVOKING REST-MARKET: UPDATE ITEM ===");
 			System.out.println("Status:.............: STOP(invalid args)");
-			System.out.println(title + "," + descr + ","+ pNok);
-			
+			System.out.println(title + "," + descr + "," + pNok);
+
 		} else {
 			if (ib.verifyOwnedItem(toEdit, seller)) {
-			System.out.println("=== INVOKING REST-MARKET: UPDATE ITEM ===");
-			System.out.println("Status:.............: Valid input");
-				ib.prepareItemForEdit(toEdit);
-				if (descr != null) toEdit.setDescription(descr);
-				if (title != null) toEdit.setTitle(title);
-				if (pNok != null) toEdit.setPriceNok(pNok);
-				Item edited = ib.saveItemFromEdit(toEdit);
-				if(edited != null) {	
-					System.out.println("DB write:..........: Success");
+				System.out.println("=== INVOKING REST-MARKET: UPDATE ITEM ===");
+				System.out.println("Status:.............: Verified seller " + seller.getId());
+				if (toEdit.getPurchase().getId() == null) {
+					ib.prepareItemForEdit(toEdit);
+					if (descr != null) {
+						toEdit.setDescription(descr);
+					}
+					if (title != null) {
+						toEdit.setTitle(title);
+					}
+					if (pNok != null) {
+						toEdit.setPriceNok(pNok);
+					}
+					Item edited = ib.saveItemFromEdit(toEdit);
+					if (edited != null) {
+						System.out.println("DB write:..........: Success");
+					}
+					r = Response.ok(edited).build();
+				} else {
+					
+				System.out.println("DB Write:.............: Abort, already sold");
 				}
-				r = Response.ok(edited).build();
+			System.out.println("DB Write:.............: Abort, not owner");
 			}
 		}
 		return r;
