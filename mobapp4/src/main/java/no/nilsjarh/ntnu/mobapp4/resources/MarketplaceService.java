@@ -195,6 +195,7 @@ public class MarketplaceService {
 			if (p != null) {
 				r = Response.ok(p).build();
 				mb.sendEmail(buyer.getEmail(), "Item purchased", mb.generateMailBody(p, p.getItem().getSellerUser(), buyer));
+				mb.sendEmail(p.getItem().getSellerUser().getEmail(), "Your item was sold", mb.generateMailBody(p, p.getItem().getSellerUser(), buyer));
 			}
 		}
 
