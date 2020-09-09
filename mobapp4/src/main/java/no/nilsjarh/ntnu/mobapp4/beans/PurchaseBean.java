@@ -90,7 +90,6 @@ public class PurchaseBean {
 			System.out.println("- Price ........NOK: " + item.getPriceNok());
 			System.out.println("- Completed on.....: " + o.getPurchaseDate());
 			System.out.println("- Item UID.........: " + item.getId());
-			mb.sendEmail(buyer.getEmail(), "Item purchased", mb.generateMailBody(p));
 			return o;
 
 		} catch (Exception e) {
