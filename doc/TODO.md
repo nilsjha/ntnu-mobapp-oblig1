@@ -9,6 +9,7 @@
   * Implement functionality to delete attachment
   * Implement delete file on disk when attachment is removed from DB
   * Migrate folder exsists check to startup of server
+  * After Item has been sold: disable upload/delete of attachment
 * Item bean
   * Implement delete attachment on item delete
   * List: Implement SQL/logic to display published items in date range (bonus)
