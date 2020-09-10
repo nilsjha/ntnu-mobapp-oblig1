@@ -128,7 +128,7 @@ public class MarketplaceService {
 
 	@GET
 	@Path("list")
-	@RolesAllowed(value = {Group.USER})
+	//@RolesAllowed(value = {Group.USER})
 	public Response listItems(@QueryParam("list-all") boolean listAll) {
 		System.out.println("=== INVOKING REST-MARKET: LIST ALL ITEMS ===");
 		System.out.print("Query parameters: listall:" + listAll);
