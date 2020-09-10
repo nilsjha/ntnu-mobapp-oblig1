@@ -369,20 +369,21 @@ public class MarketplaceService {
 	 * image will be scaled to the appropriate width if the with parameter
 	 * is provided.
 	 *
-	 * @param name the filename of the image
+	 * @param id the filename of the image
 	 * @param width the required scaled with of the image
 	 *
 	 * @return the image in original format or in jpeg if scaled
 	 */
 	@GET
-	@Path("image/{name}")
+	@Path("image/{id}")
 	@Produces("image/jpeg")
-	public Response getImage(@PathParam("name") String name,
+	public Response getImage(@PathParam("id") String id,
 		@QueryParam("width") int width) {
+		System.out.println("=== INVOKING REST-MARKET: GET ATTACHMENT ===");
 		if (em.find(Attachment.class,
-			name) != null) {
+			id) != null) {
 			StreamingOutput result = (OutputStream os) -> {
-				java.nio.file.Path image = Paths.get(getPhotoPath(), name);
+				java.nio.file.Path image = Paths.get(getPhotoPath(), id);
 				if (width == 0) {
 					Files.copy(image, os);
 					os.flush();

@@ -86,9 +86,9 @@ public class AttachmentBean {
 					if (!(Files.exists(Paths.get(path)))) {
 						Files.createDirectory(Paths.get(path));
 					}
-					Files.copy(is, Paths.get(path, pid));
+					long size = Files.copy(is, Paths.get(path, pid));
 
-					Attachment attachment = new Attachment(pid, meta.getFileName(), meta.getSize(), meta.getType());
+					Attachment attachment = new Attachment(pid, meta.getFileName(), size, meta.getType());
 					attachment.setAttachedItem(i);
 					if (description != null) {
 						attachment.setDescription(description);
