@@ -5,7 +5,16 @@
  */
 package no.nilsjarh.ntnu.mobapp4.resources;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Resource;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
@@ -23,14 +32,19 @@ import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 import lombok.extern.java.Log;
 import no.nilsjarh.ntnu.mobapp4.beans.*;
+import no.nilsjarh.ntnu.mobapp4.domain.Attachment;
 import no.nilsjarh.ntnu.mobapp4.domain.Item;
 import no.nilsjarh.ntnu.mobapp4.domain.Purchase;
 import no.nilsjarh.ntnu.mobapp4.domain.User;
@@ -38,6 +52,11 @@ import no.ntnu.tollefsen.auth.Group;
 import no.ntnu.tollefsen.auth.KeyService;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.glassfish.jersey.media.multipart.ContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+import net.coobird.thumbnailator.Thumbnails;
 
 /**
  *
@@ -72,6 +91,13 @@ public class MarketplaceService {
 	@PersistenceContext
 	EntityManager em;
 
+	/**
+	 * path to store photos
+	 */
+	@Inject
+	@ConfigProperty(name = "photo.storage.path", defaultValue = "photos")
+	String photoPath;
+
 	@Inject
 	PasswordHash hasher;
 
@@ -89,6 +115,16 @@ public class MarketplaceService {
 
 	@Inject
 	MailBean mb;
+
+	@Inject
+	AttachmentBean ab;
+
+	@Context
+	SecurityContext sc;
+
+	private String getPhotoPath() {
+		return photoPath;
+	}
 
 	@GET
 	@Path("list")
@@ -195,6 +231,7 @@ public class MarketplaceService {
 			if (p != null) {
 				r = Response.ok(p).build();
 				mb.sendEmail(buyer.getEmail(), "Item purchased", mb.generateMailBody(p, p.getItem().getSellerUser(), buyer));
+				mb.sendEmail(p.getItem().getSellerUser().getEmail(), "Your item was sold", mb.generateMailBody(p, p.getItem().getSellerUser(), buyer));
 			}
 		}
 
@@ -233,7 +270,7 @@ public class MarketplaceService {
 			if (ib.verifyOwnedItem(toEdit, seller)) {
 				System.out.println("=== INVOKING REST-MARKET: UPDATE ITEM ===");
 				System.out.println("Status:.............: Verified seller " + seller.getId());
-				if (toEdit.getPurchase().getId() == null) {
+				if (toEdit.getPurchase() == null) {
 					ib.prepareItemForEdit(toEdit);
 					if (descr != null) {
 						toEdit.setDescription(descr);
@@ -284,6 +321,93 @@ public class MarketplaceService {
 
 		System.out.print("State..........:" + "NO ITEM");
 		return Response.status(Response.Status.BAD_REQUEST).build();
+	}
+
+	/**
+	 * Accepts a multipart POST image
+	 *
+	 * @param itemid id of item to attach image to
+	 * @param description text description of image
+	 * @param multiPart used to extract the image data
+	 * @return
+	 */
+	@POST
+	@Path("attach")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({Group.USER})
+	public Response sendMessage(@FormDataParam("itemid") Long itemid,
+		@FormDataParam("description") String description,
+		FormDataMultiPart multiPart) {
+		System.out.println("=== INVOKING REST-MARKET: ATTACH TO ITEM ===");
+		Response r = Response.notModified().build();
+
+		User user = em.find(User.class, sc.getUserPrincipal().getName());
+		Item toAttach = ib.getItem(itemid);
+		if (toAttach != null && (user.equals(toAttach.getSellerUser()))) {
+			System.out.print("Item UID.............:" + toAttach.getId());
+			System.out.print("Owner................:" + toAttach.getSellerUser());
+			toAttach = ab.uploadAttachment(toAttach, multiPart, photoPath, description);
+
+			if (toAttach != null) {
+				System.out.println("=== INVOKING REST-MARKET: ATTACH TO ITEM ===");
+				System.out.print("State................:" + "ADDED ATTACHMENT");
+				return Response.ok(toAttach).build();
+			}
+			System.out.println("=== INVOKING REST-MARKET: ATTACH TO ITEM ===");
+			System.out.print("State................:" + "ERROR, CHECK LOGS");
+			return r;
+		} else {
+			System.out.println("=== INVOKING REST-MARKET: ATTACH TO ITEM ===");
+			System.out.print("State................:" + "NO ACCESS, NOT MODIFIED");
+		}
+		return r;
+	}
+
+	/**
+	 * Streams an image to the browser(the actual compressed pixels). The
+	 * image will be scaled to the appropriate width if the with parameter
+	 * is provided.
+	 *
+	 * @param id the filename of the image
+	 * @param width the required scaled with of the image
+	 *
+	 * @return the image in original format or in jpeg if scaled
+	 */
+	@GET
+	@Path("image/{id}")
+	@Produces("image/jpeg")
+	public Response getImage(@PathParam("id") String id,
+		@QueryParam("width") int width) {
+		System.out.println("=== INVOKING REST-MARKET: GET ATTACHMENT ===");
+		if (em.find(Attachment.class,
+			id) != null) {
+			StreamingOutput result = (OutputStream os) -> {
+				java.nio.file.Path image = Paths.get(getPhotoPath(), id);
+				if (width == 0) {
+					Files.copy(image, os);
+					os.flush();
+				} else {
+					Thumbnails.of(image.toFile())
+						.size(width, width)
+						.outputFormat("jpeg")
+						.toOutputStream(os);
+				}
+			};
+
+			// Ask the browser to cache the image for 24 hours
+			CacheControl cc = new CacheControl();
+
+			cc.setMaxAge(
+				86400);
+			cc.setPrivate(
+				true);
+
+			return Response.ok(result)
+				.cacheControl(cc).build();
+		} else {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
 	}
 
 }

@@ -16,6 +16,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import jdk.internal.jline.internal.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -31,26 +32,38 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Attachment {
-	
+
 	@Id
-	@Column(name = "id", nullable = false)
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	Long id;
+	String id;
+
+	@JsonbTransient
+	String path;
+	
+	String description;
+
+
+	@JsonbTransient
+	long filesize;
 	
 	
-	private String description;
-	
-	private MimeType type;
-	
-	
-	private String path;
+	@JsonbTransient
+	String mimeType;
 
 	/**
 	 * OWNING SIDE *
 	 */
+	@Nullable
+	@JsonbTransient
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
 	@JoinColumn(name = "attached_item_id", referencedColumnName = "id",
-		nullable = false)
+		nullable = true)
 	private Item attachedItem;
 	
+	public Attachment(String id, String filename, long size, String type) {
+		this.id = id;
+		this.path = filename;
+		this.filesize = size;
+		this.mimeType = type;
+	}
+
 }

@@ -14,3 +14,9 @@ dataSource.databaseName=databasename
 
 dataSource.user=username
 dataSource.password=password
+
+app.contact.brandname=Fant
+app.contact.telephone=+4758000000
+app.contact.address=NTNU Ålesund, 6009 Ålesund
+app.contact.gdpr=http://www.ntnu.no/
+app.contact.website=http://www.ntnu.no/
