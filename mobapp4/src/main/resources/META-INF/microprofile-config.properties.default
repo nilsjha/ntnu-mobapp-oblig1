@@ -1,0 +1,22 @@
+photo.storage.path=chatphotos
+mail.smtp.host=smtp.office365.com
+mail.smtp.username=student@ntnu.no
+mail.smtp.password=password
+mp.jwt.verify.publickey.location=http://localhost:8080/api/publickey.pem
+mp.jwt.verify.issuer=template
+
+
+# Datasource to be used 
+# Copy this file to "microprofile-config.properties" and edit the properties
+dataSource.serverName=host.tld
+dataSource.port=5432
+dataSource.databaseName=databasename
+
+dataSource.user=username
+dataSource.password=password
+
+app.contact.brandname=Fant
+app.contact.telephone=+4758000000
+app.contact.address=NTNU Ålesund, 6009 Ålesund
+app.contact.gdpr=http://www.ntnu.no/
+app.contact.website=http://www.ntnu.no/
