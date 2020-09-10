@@ -3,6 +3,7 @@
 ## API
 * MarketplaceService 
   * Attachment: Migrate read method into bean
+
 ## Business logic
 * Attachment bean
   * Implement functionality to delete attachment
