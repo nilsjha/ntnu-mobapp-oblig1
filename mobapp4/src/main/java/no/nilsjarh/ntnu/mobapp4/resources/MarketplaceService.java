@@ -91,12 +91,7 @@ public class MarketplaceService {
 	@PersistenceContext
 	EntityManager em;
 
-	/**
-	 * path to store photos
-	 */
-	@Inject
-	@ConfigProperty(name = "photo.storage.path", defaultValue = "photos")
-	String photoPath;
+	
 
 	@Inject
 	PasswordHash hasher;
@@ -122,9 +117,7 @@ public class MarketplaceService {
 	@Context
 	SecurityContext sc;
 
-	private String getPhotoPath() {
-		return photoPath;
-	}
+
 
 	@GET
 	@Path("list")
@@ -347,7 +340,7 @@ public class MarketplaceService {
 		if (toAttach != null && (user.equals(toAttach.getSellerUser()))) {
 			System.out.print("Item UID.............:" + toAttach.getId());
 			System.out.print("Owner................:" + toAttach.getSellerUser());
-			toAttach = ab.uploadAttachment(toAttach, multiPart, photoPath, description);
+			toAttach = ab.uploadAttachment(toAttach, multiPart, description);
 
 			if (toAttach != null) {
 				System.out.println("=== INVOKING REST-MARKET: ATTACH TO ITEM ===");
@@ -382,18 +375,8 @@ public class MarketplaceService {
 		System.out.println("=== INVOKING REST-MARKET: GET ATTACHMENT ===");
 		if (em.find(Attachment.class,
 			id) != null) {
-			StreamingOutput result = (OutputStream os) -> {
-				java.nio.file.Path image = Paths.get(getPhotoPath(), id);
-				if (width == 0) {
-					Files.copy(image, os);
-					os.flush();
-				} else {
-					Thumbnails.of(image.toFile())
-						.size(width, width)
-						.outputFormat("jpeg")
-						.toOutputStream(os);
-				}
-			};
+			System.out.print("State................:" + "Found Attachment");
+			StreamingOutput result = ab.streamAttachment(id,width);
 
 			// Ask the browser to cache the image for 24 hours
 			CacheControl cc = new CacheControl();
