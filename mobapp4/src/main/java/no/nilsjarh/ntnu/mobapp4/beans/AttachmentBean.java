@@ -8,8 +8,11 @@ package no.nilsjarh.ntnu.mobapp4.beans;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -23,6 +26,7 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.sql.DataSource;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -176,32 +180,74 @@ public class AttachmentBean {
 		}
 	}
 
-	public boolean deleteAttachment(String uid) {
-		System.out.println("=== EJB-ATTACHMENT: DELETE ===");
-
-		Attachment toDelete = getAttachment(uid);
+	private boolean deleteFromDisk(String id) {
+		System.out.println("=== EJB-ATTACHMENT: DELETE FROM DISK ===");
+		Attachment toDelete = getAttachment(id);
 		try {
 			if (toDelete != null) {
 
-				Item assocItem = toDelete.getAttachedItem();
-				ib.prepareItemForEdit(assocItem);
-				toDelete.setAttachedItem(null);
-				em.remove(uid);
-				ib.saveItemFromEdit(assocItem);
-				em.flush();
-				System.out.println("=== EJB-ATTACHMENT: DELETE ===");
-				System.out.println("- Status.........: " + "DETACHED & DELETED");
-				return true;
+				java.nio.file.Path storedPath = java.nio.file.Path.of(photoPath, id);
+				if (Files.deleteIfExists(storedPath)) {
+					System.out.println("=== EJB-ATTACHMENT: DELETE FROM DISK ===");
+					System.out.println("- Status.........: " + "DELETED");
+					return true;
+				} else {
+					System.out.println("=== EJB-ATTACHMENT: DELETE FROM DISK ===");
+					System.out.println("- Status.........: " + "PATH DOESNT EXSIST");
+					System.out.println("- Path:.........: " + storedPath);
+
+				}
+			} else {
+				System.out.println("=== EJB-ATTACHMENT: DELETE FROM DISK ===");
+				System.out.println("- Status.........: " + "ERROR, TODELETE IS NULL");
+
 			}
 		} catch (Exception e) {
-			System.out.println("=== EJB-ATTACHMENT: DELETE ===");
+			System.out.println("=== EJB-ATTACHMENT: DELETE FROM DISK ===");
 			System.out.println("- Status.........: " + "ERROR");
 			System.err.println(e);
 		}
 		return false;
 	}
 
-	public boolean removeFromItem(Long itemid, Attachment a) {
+	public boolean removeAllFromItem(Item i) {
+		System.out.println("=== EJB-ATTACHMENT: REMOVE-ALL FROM ITEM ===");
+		try {
+			if (i != null) {
+				em.refresh(i);
+				Query q = em.createNamedQuery(Attachment.FIND_ATTACHMENTS_BY_ITEM);
+				q.setParameter(1, i.getId());
+				List<String> remlist = new ArrayList<>();
+				List<Attachment> attList = q.getResultList();
+
+				if (attList.isEmpty()) {
+					System.out.println("- Status.........: " + "SKIPPED, NO ATTACHMEMTS");
+					return true;
+				}
+
+
+				for (Attachment a : attList) {
+					em.refresh(a);
+					remlist.add(a.getId());
+					System.out.println("- Found ID.......: " + a.getId());
+					if (deleteFromDisk(a.getId())) {
+						System.out.println("- Status.........: " + "REMOVED FROM DISK");
+						em.remove(a);
+					} else {
+
+						System.out.println("- Status.........: " + "UNABLE TO REMOVE FROM DISK");
+					}
+				}
+				System.out.println("- Removed........: " + remlist.size() + " attachment(s)");
+				em.refresh(i);
+				return true;
+
+			}
+		} catch (Exception e) {
+			System.out.println("=== EJB-ATTACHMENT: REMOVE-ALL FROM ITEM ===");
+			System.out.println("- Status.........: " + "ERROR, EXCEPTION");
+			System.err.println(e);
+		}
 		return false;
 	}
 

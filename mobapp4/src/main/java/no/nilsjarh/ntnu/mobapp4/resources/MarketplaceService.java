@@ -91,8 +91,6 @@ public class MarketplaceService {
 	@PersistenceContext
 	EntityManager em;
 
-	
-
 	@Inject
 	PasswordHash hasher;
 
@@ -116,8 +114,6 @@ public class MarketplaceService {
 
 	@Context
 	SecurityContext sc;
-
-
 
 	@GET
 	@Path("list")
@@ -302,8 +298,12 @@ public class MarketplaceService {
 			if (ib.verifyOwnedItem(itemToDelete, em.find(User.class,
 				principal.getName()))) {
 
-				if (ib.deleteItem(itemToDelete)) {
-					return Response.ok("").build();
+				if (ab.removeAllFromItem(itemToDelete)) {
+
+					if (ib.deleteItem(itemToDelete)) {
+						return Response.ok("").build();
+					}
+
 				}
 
 			}
@@ -373,9 +373,9 @@ public class MarketplaceService {
 	public Response getImage(@PathParam("id") String id,
 		@QueryParam("width") int width) {
 		System.out.println("=== INVOKING REST-MARKET: GET ATTACHMENT ===");
-		
-		StreamingOutput result = ab.streamAttachment(id,width);
-			
+
+		StreamingOutput result = ab.streamAttachment(id, width);
+
 		if (result != null) {
 
 			// Ask the browser to cache the image for 24 hours

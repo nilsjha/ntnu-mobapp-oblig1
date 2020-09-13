@@ -5,6 +5,7 @@
  */
 package no.nilsjarh.ntnu.mobapp4.domain;
 
+import java.io.Serializable;
 import javax.activation.MimeType;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.CascadeType;
@@ -16,6 +17,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import jdk.internal.jline.internal.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,7 +34,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Attachment {
+@NamedQueries({
+	@NamedQuery(name = Attachment.FIND_ATTACHMENTS_BY_ITEM,
+		query = "SELECT a FROM attachments a WHERE a.attachedItem.id = ?1")
+})
+public class Attachment implements Serializable{
+	public final static String FIND_ATTACHMENTS_BY_ITEM = "findAttachmentsByItem";
 
 	@Id
 	String id;
