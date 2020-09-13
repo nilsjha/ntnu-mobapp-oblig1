@@ -46,6 +46,9 @@ public class ItemBean {
 	 */
 	@PersistenceContext
 	EntityManager em;
+	
+	@Inject
+	AttachmentBean ab;
 
 	public Item addItem(User seller, String title, BigDecimal priceNok) {
 		System.out.println("=== ITEM EJB: CREATE ITEM ===");
@@ -131,6 +134,7 @@ public class ItemBean {
 			System.out.println("- Found item id..: " + id);
 			em.refresh(i);
 			if (i.getPurchase() == null) {
+				ab.removeAllFromItem(i);
 				em.remove(i);
 				em.flush();
 				if (getItem(id) == null) {
