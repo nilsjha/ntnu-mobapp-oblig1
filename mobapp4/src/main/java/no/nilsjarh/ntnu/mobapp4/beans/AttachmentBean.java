@@ -145,30 +145,35 @@ public class AttachmentBean {
 		System.out.println("=== EJB-ATTACHMENT: STREAM ===");
 		String path = photoPath;
 		try {
-			if (em.find(Attachment.class,
-				id) != null) {
+			if (getAttachment(id) != null) {
 				StreamingOutput result = (OutputStream os) -> {
 					java.nio.file.Path image = Paths.get(path, id);
 					if (width == 0) {
 						Files.copy(image, os);
 						os.flush();
-				System.out.println("- Status.........: " + "Streamed native");
+						System.out.println("- Status.........: " + "Streamed native");
 					} else {
 						Thumbnails.of(image.toFile())
 							.size(width, width)
 							.outputFormat("jpeg")
 							.toOutputStream(os);
-						
-				System.out.println("- Status.........: " + "Streamed thumb " + width + " px");
+
+						System.out.println("- Status.........: " + "Streamed thumb " + width + " px");
 					}
 				};
 
 				return result;
+			} else {
+				System.out.println("- Status.........: " + "Not found, returning null");
+				return null;
 			}
 
 		} catch (Exception e) {
+
+			System.out.println("- Status.........: " + "Exception, returning null");
+			System.err.print(e);
+			return null;
 		}
-		return null;
 	}
 
 	public boolean deleteAttachment(String uid) {
@@ -189,9 +194,9 @@ public class AttachmentBean {
 				return true;
 			}
 		} catch (Exception e) {
-				System.out.println("=== EJB-ATTACHMENT: DELETE ===");
-				System.out.println("- Status.........: " + "ERROR");
-				System.err.println(e);
+			System.out.println("=== EJB-ATTACHMENT: DELETE ===");
+			System.out.println("- Status.........: " + "ERROR");
+			System.err.println(e);
 		}
 		return false;
 	}

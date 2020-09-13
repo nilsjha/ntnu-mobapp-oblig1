@@ -373,10 +373,10 @@ public class MarketplaceService {
 	public Response getImage(@PathParam("id") String id,
 		@QueryParam("width") int width) {
 		System.out.println("=== INVOKING REST-MARKET: GET ATTACHMENT ===");
-		if (em.find(Attachment.class,
-			id) != null) {
-			System.out.print("State................:" + "Found Attachment");
-			StreamingOutput result = ab.streamAttachment(id,width);
+		
+		StreamingOutput result = ab.streamAttachment(id,width);
+			
+		if (result != null) {
 
 			// Ask the browser to cache the image for 24 hours
 			CacheControl cc = new CacheControl();
