@@ -298,13 +298,9 @@ public class MarketplaceService {
 			if (ib.verifyOwnedItem(itemToDelete, em.find(User.class,
 				principal.getName()))) {
 
-				//if (ab.removeAllFromItem(itemToDelete)) {
-
-					if (ib.deleteItem(itemToDelete)) {
+				if (ib.deleteItem(itemToDelete)) {
 						return Response.ok("").build();
-					}
-
-				//}
+				}
 
 			}
 			System.out.println("=== INVOKING REST-MARKET: DELETE ITEM ===");
