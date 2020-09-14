@@ -42,11 +42,11 @@ public class AuthRunOnStartup {
 
 		User admin = userBean.createUser("admin@admin.ad", "123456");
 		// TEST DUP USER
-		userBean.addGroup(admin, "user", true);
+		//userBean.addGroup(admin, "user", true);
 		// TEST REMOVE USER
-		userBean.addGroup(admin, "user", false);
+		//userBean.addGroup(admin, "user", false);
 		// TEST ADD USER
-		userBean.addGroup(admin, "user", true);
+		//userBean.addGroup(admin, "user", true);
 		// TEST ADD ADMIN
 		userBean.addGroup(admin, "admin", true);
 
