@@ -1,0 +1,34 @@
+version: "3.7"
+services:
+  mobapp-docker-db:
+    ports:
+      - 5432:5432        
+    image: "postgres:13"
+    container_name: mobapp-docker-db
+    environment:
+      POSTGRES_DB: ${DB_BASE}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWD}
+    volumes:
+      - database-data:/var/lib/postgresql/data
+
+  mobapp-docker-api:
+    container_name: mobapp-docker-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    ports:
+      - 8080:8080
+      - 8181:8181
+      - 4848:4848
+    depends_on:
+      - "mobapp-docker-db"
+    environment:
+      DB_HOST: mobapp-docker-db
+      DB_BASE: ${DB_BASE}
+      DB_USER: ${DB_USER} 
+      DB_PASSWD: ${DB_PASSWD}
+
+volumes:
+  database-data:

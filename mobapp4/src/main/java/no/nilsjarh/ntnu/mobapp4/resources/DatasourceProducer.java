@@ -4,10 +4,8 @@ import javax.annotation.Resource;
 import javax.annotation.sql.DataSourceDefinition;
 import javax.ejb.Singleton;
 import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
 import javax.sql.DataSource;
 import static no.nilsjarh.ntnu.mobapp4.resources.DatasourceProducer.JNDI_NAME;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 
 /**

@@ -19,7 +19,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import jdk.internal.jline.internal.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -60,7 +59,6 @@ public class Attachment implements Serializable{
 	/**
 	 * OWNING SIDE *
 	 */
-	@Nullable
 	@JsonbTransient
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
 	@JoinColumn(name = "attached_item_id", referencedColumnName = "id",

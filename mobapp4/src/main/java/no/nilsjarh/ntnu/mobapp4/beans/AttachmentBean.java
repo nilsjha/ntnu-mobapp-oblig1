@@ -8,11 +8,10 @@ package no.nilsjarh.ntnu.mobapp4.beans;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -20,19 +19,13 @@ import java.util.logging.Logger;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.EntityManager;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.sql.DataSource;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.StreamingOutput;
-import lombok.Getter;
 import lombok.extern.java.Log;
 import net.coobird.thumbnailator.Thumbnails;
 import no.nilsjarh.ntnu.mobapp4.domain.*;
@@ -151,7 +144,7 @@ public class AttachmentBean {
 		try {
 			if (getAttachment(id) != null) {
 				StreamingOutput result = (OutputStream os) -> {
-					java.nio.file.Path image = Paths.get(path, id);
+					Path image = Paths.get(path, id);
 					if (width == 0) {
 						Files.copy(image, os);
 						os.flush();
@@ -186,7 +179,7 @@ public class AttachmentBean {
 		try {
 			if (toDelete != null) {
 
-				java.nio.file.Path storedPath = java.nio.file.Path.of(photoPath, id);
+				Path storedPath = Paths.get(photoPath, id);
 				if (Files.deleteIfExists(storedPath)) {
 					System.out.println("=== EJB-ATTACHMENT: DELETE FROM DISK ===");
 					System.out.println("- Status.........: " + "DELETED");
