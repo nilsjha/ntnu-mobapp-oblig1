@@ -151,7 +151,7 @@ public class MailBean {
 		sb.append("Web: ").append(appBrandWeb).append("\n");
 		sb.append("\n");
 
-		if (appBrandLinkGdpr.isBlank() == false) {
+		if (appBrandLinkGdpr != null) {
 			sb.append("Read privacy policy & GDPR info at: ").append(appBrandLinkGdpr).append("\n");
 		}
 		return sb.toString();

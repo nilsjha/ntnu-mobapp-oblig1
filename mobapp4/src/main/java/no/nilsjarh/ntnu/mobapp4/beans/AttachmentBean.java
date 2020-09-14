@@ -106,7 +106,7 @@ public class AttachmentBean {
 		try {
 			System.out.println("=== INVOKING EJB-ATTACHMENT: UPLOAD ===");
 			List<FormDataBodyPart> images = multiPart.getFields("image");
-			if (images != null && i != null) {
+			if (images != null && i != null && i.getPurchase() == null) {
 				for (FormDataBodyPart part : images) {
 					InputStream is = part.getEntityAs(InputStream.class);
 					ContentDisposition meta = part.getContentDisposition();
