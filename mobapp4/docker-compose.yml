@@ -35,9 +35,10 @@ services:
       - "traefik.http.services.api.loadbalancer.server.port=8080"
       - "traefik.http.routers.api.rule=Host(`${API_TLD}`)"
       - "traefik.http.routers.api.middlewares=api-add-prefix@docker"
-      - "traefik.http.middlewares.api-add-prefix.addprefix.prefix=/mobapp4"
+      - "traefik.http.middlewares.api-add-prefix.addprefix.prefix=/mobapp4/api"
 
   reverse-proxy:
+    container_name: mobapp-proxy
     # The official v2 Traefik docker image
     image: traefik:v2.2
     # Enables the web UI and tells Traefik to listen to docker
