@@ -37,19 +37,23 @@ services:
       - "traefik.http.routers.api.rule=Host(`${API_TLD}`)"
       - "traefik.http.routers.api.middlewares=api-add-prefix@docker"
       - "traefik.http.middlewares.api-add-prefix.addprefix.prefix=/mobapp4"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.api.tls.certresolver=buypass"
 
   reverse-proxy:
     container_name: mobapp-proxy
     image: traefik:v2.2
     # Enables the web UI and tells Traefik to listen to docker
-    command: --api.insecure=false --providers.docker
     ports:
-      # The HTTP port
+      # Front ports
       - "80:80"
+      - "443:443"
       # The Web UI (enabled by --api.insecure=true)
       - "127.0.0.1:8088:8080"
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
+      - ${PWD}/mobapp-acme.json:/acme.json
+      - ${PWD}/mobapp-proxy.toml:/traefik.toml
 volumes:
   database-data:
