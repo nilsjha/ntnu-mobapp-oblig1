@@ -173,7 +173,7 @@ public class MarketplaceService {
 
 	@GET
 	@Path("view")
-	@RolesAllowed(value = {Group.USER})
+	//@RolesAllowed(value = {Group.USER})
 	public Response viewItem(@QueryParam("id") Long id) {
 		System.out.println("=== INVOKING REST-MARKET: VIEW ITEM ===");
 		System.out.print("Query parameters: id:" + id);
