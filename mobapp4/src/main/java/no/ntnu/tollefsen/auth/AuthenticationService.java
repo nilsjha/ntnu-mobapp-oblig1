@@ -70,6 +70,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
  */
 @Path("auth")
 @Stateless
+@Produces(MediaType.APPLICATION_JSON)
 @Log
 public class AuthenticationService {
 
@@ -139,7 +140,7 @@ public class AuthenticationService {
 				System.out.println("- Logged on with ID...............: " + exsistingUser.getId());
 				System.out.println();
 				return Response
-					.ok(token)
+					.ok()
 					.header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
 					.build();
 			}
