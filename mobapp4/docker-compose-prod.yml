@@ -59,3 +59,4 @@ services:
       - ${PWD}/mobapp-proxy.toml:/traefik.toml
 volumes:
   database-data:
+  api-pictures:
