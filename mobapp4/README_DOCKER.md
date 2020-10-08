@@ -6,8 +6,8 @@ Docker Compose uses environment variables to create the database and bind the se
 
 1. Create .env file in this dir to hold environment variables. See .env.example for required variables.
 1. Link or copy the whised *docker-compose* depending on your enviroment
-   * **When running on server:** Use the *docker-compose-prod.yml* to generate ssl certs and expose the service to a domain. This can be done with `ln -s docker-compose-prod.yml docker-compose.yml` in UNI\*X.
-   * **When running on locally with locahost:** Use the *docker-compose-dev.yml* to set up the service with ports mapped to `localhost`. Payara, PostgreSQL will work, Traefik will not be invoked.
+   * **When running on server:** Use the *docker-compose-prod.yml* to generate ssl certs and expose the service to a domain. This can be done with `ln -s docker-compose-prod.yml docker-compose.yml` in UN\*X.
+   * **When running on locally with localhost:** Use the *docker-compose-dev.yml* to set up the service with ports mapped to `localhost`. Payara, PostgreSQL will work, Traefik will not be invoked.
 3. Set the required enviroment variables for the JavaEE Application (*"the server"*) by creating `src/main/resources/META-INF/microprofile-config.properties`. A template is available named `src/main/resources/META-INF/microprofile-config.properties.default`.
 
 ## Operation
