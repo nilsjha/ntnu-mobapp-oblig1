@@ -39,6 +39,8 @@ services:
       - "traefik.http.middlewares.api-add-prefix.addprefix.prefix=/mobapp4"
       - "traefik.http.routers.api.tls=true"
       - "traefik.http.routers.api.tls.certresolver=buypass"
+    volumes:
+      - api-pictures:/api-pictures
 
   reverse-proxy:
     container_name: mobapp-proxy

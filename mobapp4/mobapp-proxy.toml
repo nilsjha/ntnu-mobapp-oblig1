@@ -1,5 +1,7 @@
+[accessLog]
+
 [api]
-insecure = false
+insecure = true
 dashboard = true
 
 [providers.docker]
