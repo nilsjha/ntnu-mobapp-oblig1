@@ -76,28 +76,6 @@ public class MarketplaceService {
 	@Inject
 	@ConfigProperty(name = "mp.jwt.verify.issuer", defaultValue = "issuer")
 	String issuer;
-
-	/**
-	 * The application server will inject a DataSource as a way to
-	 * communicate with the database.
-	 */
-	@Resource(lookup = DatasourceProducer.JNDI_NAME)
-	DataSource dataSource;
-
-	/**
-	 * The application server will inject a EntityManager as a way to
-	 * communicate with the database via JPA.
-	 */
-	@PersistenceContext
-	EntityManager em;
-
-	/**
-	 * path to store photos
-	 */
-	@Inject
-	@ConfigProperty(name = "photo.storage.path", defaultValue = "photos")
-	String photoPath;
-
 	@Inject
 	PasswordHash hasher;
 
@@ -121,10 +99,6 @@ public class MarketplaceService {
 
 	@Context
 	SecurityContext sc;
-
-	private String getPhotoPath() {
-		return photoPath;
-	}
 
 	@GET
 	@Path("list")
@@ -155,7 +129,7 @@ public class MarketplaceService {
 		System.out.println("=== INVOKING REST-MARKET: LIST OWN ITEMS ===");
 
 		Response r = Response.status(Response.Status.BAD_REQUEST).build();
-		User u = em.find(User.class, principal.getName());
+		User u = ub.findUserById(principal.getName());
 
 		if (u != null) {
 			System.out.print("Query parameters: user:" + u.getId()
@@ -188,8 +162,7 @@ public class MarketplaceService {
 	public Response addItem(@FormParam("title") String title, @FormParam("price") BigDecimal price) {
 		System.out.println("=== INVOKING REST-MARKET: CREATE ITEM ===");
 		System.out.print("Query parameters: title:" + title + ", price:" + price);
-		Item createdItem = ib.addItem(em.find(User.class,
-			principal.getName()), title, price);
+		Item createdItem = ib.addItem(ub.findUserById(principal.getName()), title, price);
 		if (createdItem != null) {
 			return Response.ok(createdItem).build();
 
@@ -200,7 +173,7 @@ public class MarketplaceService {
 
 	@GET
 	@Path("view")
-	@RolesAllowed(value = {Group.USER})
+	//@RolesAllowed(value = {Group.USER})
 	public Response viewItem(@QueryParam("id") Long id) {
 		System.out.println("=== INVOKING REST-MARKET: VIEW ITEM ===");
 		System.out.print("Query parameters: id:" + id);
@@ -223,7 +196,7 @@ public class MarketplaceService {
 		System.out.println("=== INVOKING REST-MARKET: PURCHASE ITEM ===");
 		System.out.print("Query parameters: id:" + itemId);
 		Response r = Response.status(Response.Status.BAD_REQUEST).build();
-		User buyer = em.find(User.class, principal.getName());
+		User buyer = ub.findUserById(principal.getName());
 		if ((buyer == null) || (itemId == null)) {
 			return r;
 		} else {
@@ -260,7 +233,7 @@ public class MarketplaceService {
 			+ title + " descr:" + descr + " price:" + pNok);
 		Response r = Response.status(Response.Status.BAD_REQUEST).build();
 		Item toEdit = ib.getItem(id);
-		User seller = em.find(User.class, principal.getName());
+		User seller = ub.findUserById(principal.getName());
 		if ((toEdit == null) || (seller == null)) {
 			System.out.println("=== INVOKING REST-MARKET: UPDATE ITEM ===");
 			System.out.println("Status:.............: STOP(invalid args)");
@@ -286,13 +259,16 @@ public class MarketplaceService {
 						System.out.println("DB write:..........: Success");
 					}
 					r = Response.ok(edited).build();
+					return r;
 				} else {
 
 					System.out.println("DB Write:.............: Abort, already sold");
+					r = Response.status(Response.Status.NOT_MODIFIED).build();
 					return r;
 				}
-				System.out.println("DB Write:.............: Abort, not owner");
 			}
+			System.out.println("DB Write:.............: Abort, not owner");
+			r = Response.status(Response.Status.UNAUTHORIZED).build();
 		}
 		return r;
 	}
@@ -306,11 +282,10 @@ public class MarketplaceService {
 		Item itemToDelete = ib.getItem(id);
 		if (itemToDelete != null) {
 			System.out.print("Found item.....:" + itemToDelete.getId());
-			if (ib.verifyOwnedItem(itemToDelete, em.find(User.class,
-				principal.getName()))) {
+			if (ib.verifyOwnedItem(itemToDelete, ub.findUserById(principal.getName()))) {
 
 				if (ib.deleteItem(itemToDelete)) {
-					return Response.ok("").build();
+						return Response.ok("").build();
 				}
 
 			}
@@ -342,12 +317,12 @@ public class MarketplaceService {
 		System.out.println("=== INVOKING REST-MARKET: ATTACH TO ITEM ===");
 		Response r = Response.notModified().build();
 
-		User user = em.find(User.class, sc.getUserPrincipal().getName());
+		User user = ub.findUserById(principal.getName());
 		Item toAttach = ib.getItem(itemid);
 		if (toAttach != null && (user.equals(toAttach.getSellerUser()))) {
 			System.out.print("Item UID.............:" + toAttach.getId());
 			System.out.print("Owner................:" + toAttach.getSellerUser());
-			toAttach = ab.uploadAttachment(toAttach, multiPart, photoPath, description);
+			toAttach = ab.uploadAttachment(toAttach, multiPart, description);
 
 			if (toAttach != null) {
 				System.out.println("=== INVOKING REST-MARKET: ATTACH TO ITEM ===");
@@ -380,20 +355,10 @@ public class MarketplaceService {
 	public Response getImage(@PathParam("id") String id,
 		@QueryParam("width") int width) {
 		System.out.println("=== INVOKING REST-MARKET: GET ATTACHMENT ===");
-		if (em.find(Attachment.class,
-			id) != null) {
-			StreamingOutput result = (OutputStream os) -> {
-				java.nio.file.Path image = Paths.get(getPhotoPath(), id);
-				if (width == 0) {
-					Files.copy(image, os);
-					os.flush();
-				} else {
-					Thumbnails.of(image.toFile())
-						.size(width, width)
-						.outputFormat("jpeg")
-						.toOutputStream(os);
-				}
-			};
+
+		StreamingOutput result = ab.streamAttachment(id, width);
+
+		if (result != null) {
 
 			// Ask the browser to cache the image for 24 hours
 			CacheControl cc = new CacheControl();

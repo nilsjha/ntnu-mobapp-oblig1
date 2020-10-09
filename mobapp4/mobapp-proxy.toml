@@ -1,0 +1,23 @@
+[accessLog]
+
+[api]
+insecure = true
+dashboard = true
+
+[providers.docker]
+endpoint = "unix:///var/run/docker.sock"
+
+[entryPoints]
+[entryPoints.web]
+address = ":80"
+
+[entryPoints.websecure]
+address = ":443"
+
+[certificatesResolvers.buypass.acme]
+email = "${SSL_ACME_CONTACT_EMAIL}"
+storage = "acme.json"
+caServer = "https://api.buypass.com/acme/directory"
+
+[certificatesResolvers.buypass.acme.httpChallenge]
+entryPoint = "web"
