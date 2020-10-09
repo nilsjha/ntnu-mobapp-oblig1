@@ -259,13 +259,16 @@ public class MarketplaceService {
 						System.out.println("DB write:..........: Success");
 					}
 					r = Response.ok(edited).build();
+					return r;
 				} else {
 
 					System.out.println("DB Write:.............: Abort, already sold");
+					r = Response.status(Response.Status.NOT_MODIFIED).build();
 					return r;
 				}
-				System.out.println("DB Write:.............: Abort, not owner");
 			}
+			System.out.println("DB Write:.............: Abort, not owner");
+			r = Response.status(Response.Status.UNAUTHORIZED).build();
 		}
 		return r;
 	}
